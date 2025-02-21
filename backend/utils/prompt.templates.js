@@ -56,7 +56,7 @@ Job Title: {title}
 Job Description: {description}
 Requirements: {requirements}
 
-Create a detailed career pathway for this role in the following JSON format:
+Create a detailed career pathway for this role, the output should consist of the following key sections in a HTML format:
 
 
   "0-3 Months": 
@@ -126,7 +126,7 @@ Input for Evaluation:
 - Ensure the scoring reflects both quantitative skills and qualitative professional attributes
 
 ### Output Format:
-Provide your output in the following strict JSON format:
+Provide your output in the following strict Markdown format:
 
 
   "score": score, 

@@ -1,4 +1,4 @@
-import React from 'react'
+
 import { Popover, PopoverContent, PopoverTrigger } from '../ui/popover'
 import { Button } from '../ui/button'
 import { Avatar, AvatarImage } from '../ui/avatar'
@@ -33,7 +33,7 @@ const Navbar = () => {
         <div className='bg-white'>
             <div className='flex items-center justify-between mx-auto max-w-7xl h-16'>
                 <div>
-                    <h1 className='text-2xl font-bold'>Hus<span className='text-[#F83002]'>tl</span></h1>
+                    <h1 className='text-2xl font-bold'>Career<span className='text-[#F83002]'>Lens</span></h1>
                 </div>
                 <div className='flex items-center gap-12'>
                     <ul className='flex font-medium items-center gap-5'>

@@ -26,7 +26,8 @@ const AiInterview = () => {
       <Navbar />
       <div className="max-w-9xl mx-20 mt-5" style={{ overflow: "hidden" }}>
         <iframe
-          src={iframeSrc}
+          // src={iframeSrc}
+          src={"http://localhost:3001/dashboard"}
           width="100%"
           height="100%"
           style={{
