@@ -5,7 +5,7 @@ function Footer() {
     <footer class="flex flex-col items-center bg-zinc-50 text-center text-surface dark:bg-neutral-700 dark:text-white">
       <div class="container px-6 pt-6">
         <div class="mb-6 flex justify-center space-x-2">
-          {/* <a
+          <a
             href="#!"
             type="button"
             class="rounded-full bg-[#3b5998] p-3 uppercase leading-normal text-white shadow-dark-3 shadow-black/30 transition duration-150 ease-in-out hover:shadow-dark-1 focus:shadow-dark-1 focus:outline-none focus:ring-0 active:shadow-1 dark:text-white"
@@ -21,10 +21,10 @@ function Footer() {
                 <path d="M80 299.3V512H196V299.3h86.5l18-97.8H196V166.9c0-51.7 20.3-71.5 72.7-71.5c16.3 0 29.4 .4 37 1.2V7.9C291.4 4 256.4 0 236.2 0C129.3 0 80 50.5 80 159.4v42.1H14v97.8H80z" />
               </svg>
             </span>
-          </a> */}
+          </a>
 
           <a
-            href="https://sharun266.github.io/Sharun-portfolio/"
+            href="https://github.com/pavan800869/"
             type="button"
             target="_blank"
             class="rounded-full bg-[#55acee] p-3 uppercase leading-normal text-white shadow-dark-3 shadow-black/30 transition duration-150 ease-in-out hover:shadow-dark-1 focus:shadow-dark-1 focus:outline-none focus:ring-0 active:shadow-1 dark:text-white"
@@ -43,7 +43,7 @@ function Footer() {
           </a>
 
           <a
-            href="mailto:sharunattari266@gmail.com"
+            href="mailto:pavan.kumarmetla@gmail.com"
             type="button"
             class="rounded-full bg-[#dd4b39] p-3 uppercase leading-normal text-white shadow-dark-3 shadow-black/30 transition duration-150 ease-in-out hover:shadow-dark-1 focus:shadow-dark-1 focus:outline-none focus:ring-0 active:shadow-1 dark:text-white"
             data-twe-ripple-init
@@ -97,7 +97,7 @@ function Footer() {
           </a> */}
 
           <a
-            href="https://github.com/SHARUN266"
+            href="https://github.com/pavan800869"
             target="_blank"
             type="button"
             class="rounded-full bg-[#333333] p-3 uppercase leading-normal text-white shadow-dark-3 shadow-black/30 transition duration-150 ease-in-out hover:shadow-dark-1 focus:shadow-dark-1 focus:outline-none focus:ring-0 active:shadow-1 dark:text-white"

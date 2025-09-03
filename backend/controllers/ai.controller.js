@@ -19,7 +19,7 @@ import { ChatGroq } from "@langchain/groq";
 import { StructuredOutputParser } from "@langchain/core/output_parsers";
 
 dotenv.config(); // Load environment variables
-// Initialize Gemini
+// Initialize Groq
 const llm = new ChatGroq({
   apiKey: process.env.GROQ_API_KEY,
   model: "llama-3.1-8b-instant",

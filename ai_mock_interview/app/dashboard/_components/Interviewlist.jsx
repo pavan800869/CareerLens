@@ -13,8 +13,10 @@ function Interviewlist() {
          GetInterviewList()
     },[user])
     const GetInterviewList=async()=>{
-        const result=await db.select().from(MockInterview).where(eq(MockInterview.createdBy,"voravinay6@gmail.com")).orderBy(desc(MockInterview.id))
-        setInterviewList(result)
+        if(user?.emailAddresses?.[0]?.emailAddress){
+            const result=await db.select().from(MockInterview).where(eq(MockInterview.createdBy,user.emailAddresses[0].emailAddress)).orderBy(desc(MockInterview.id))
+            setInterviewList(result)
+        }
     }
   return (
     <div>

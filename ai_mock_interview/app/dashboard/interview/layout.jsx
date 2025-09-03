@@ -1,12 +1,11 @@
 import React from "react";
 import { SignedIn, SignedOut, SignIn } from "@clerk/nextjs";
-import Footer from "./_components/Footer";
 
-function DashboardLayout({ children }) {
+function InterviewLayout({ children }) {
   return (
     <div>
       <SignedIn>
-        <div className="mx-5 md:mx-20 lg:mx-36">{children}</div>
+        {children}
       </SignedIn>
       <SignedOut>
         <div className="flex items-center justify-center min-h-screen">
@@ -17,4 +16,4 @@ function DashboardLayout({ children }) {
   );
 }
 
-export default DashboardLayout;
+export default InterviewLayout;

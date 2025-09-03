@@ -1,0 +1,138 @@
+{
+  "id": "26f66ce4-b2db-4b94-9f4d-c50019fe783f",
+  "prevId": "bfec60e8-373b-4547-99f1-aefa9f3ad84b",
+  "version": "7",
+  "dialect": "postgresql",
+  "tables": {
+    "public.mock_interview": {
+      "name": "mock_interview",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "serial",
+          "primaryKey": true,
+          "notNull": true
+        },
+        "json_mock_resp": {
+          "name": "json_mock_resp",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "job_position": {
+          "name": "job_position",
+          "type": "varchar",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "job_desc": {
+          "name": "job_desc",
+          "type": "varchar",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "job_experience": {
+          "name": "job_experience",
+          "type": "varchar",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "created_by": {
+          "name": "created_by",
+          "type": "varchar",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "created_at": {
+          "name": "created_at",
+          "type": "varchar",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "mock_id": {
+          "name": "mock_id",
+          "type": "varchar",
+          "primaryKey": false,
+          "notNull": true
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {},
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {}
+    },
+    "public.user_answer": {
+      "name": "user_answer",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "serial",
+          "primaryKey": true,
+          "notNull": true
+        },
+        "mock_id_ref": {
+          "name": "mock_id_ref",
+          "type": "varchar",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "question": {
+          "name": "question",
+          "type": "varchar",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "correct_ans": {
+          "name": "correct_ans",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "user_ans": {
+          "name": "user_ans",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "feedback": {
+          "name": "feedback",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "rating": {
+          "name": "rating",
+          "type": "varchar",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "user_email": {
+          "name": "user_email",
+          "type": "varchar",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "created_at": {
+          "name": "created_at",
+          "type": "varchar",
+          "primaryKey": false,
+          "notNull": false
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {},
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {}
+    }
+  },
+  "enums": {},
+  "schemas": {},
+  "sequences": {},
+  "_meta": {
+    "columns": {},
+    "schemas": {},
+    "tables": {}
+  }
+}
