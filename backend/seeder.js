@@ -6,6 +6,7 @@ import { Job } from './models/job.model.js';
 import { Application } from './models/application.model.js';
 import dotenv from "dotenv";
 import connectDB from "./utils/db.js";
+import bcrypt from "bcryptjs";
 
 dotenv.config({});
 const resumes = [
@@ -22,11 +23,14 @@ const resumes = [
 const seedUsers = async (count = 10) => {
     const users = [];
     for (let i = 0; i < count; i++) {
+        const plainPassword = faker.internet.password();
+        const hashedPassword = await bcrypt.hash(plainPassword, 10);
+        
         const user = new User({
-            fullname: faker.name.fullName(),
+            fullname: faker.person.fullName(),
             email: faker.internet.email(),
             phoneNumber: faker.phone.number('##########'),
-            password: faker.internet.password(),
+            password: hashedPassword,
             role: faker.helpers.arrayElement(['student', 'recruiter']),
             profile: {
                 bio: faker.lorem.sentence(),
@@ -51,7 +55,7 @@ const seedCompanies = async (users, count = 5) => {
             name: faker.company.name(),
             description: faker.company.catchPhrase(),
             website: faker.internet.url(),
-            location: faker.address.city(),
+            location: faker.location.city(),
             logo: faker.image.avatar(),
             userId: faker.helpers.arrayElement(users)._id,
         });
@@ -67,12 +71,12 @@ const seedJobs = async (companies, count = 20) => {
     const jobs = [];
     for (let i = 0; i < count; i++) {
         const job = new Job({
-            title: faker.name.jobTitle(),
+            title: faker.person.jobTitle(),
             description: faker.lorem.paragraph(),
             requirements: faker.helpers.uniqueArray(() => faker.lorem.words(3), 5),
             salary: faker.number.int({ min: 30000, max: 150000 }),
             experienceLevel: faker.number.int({ min: 0, max: 10 }),
-            location: faker.address.city(),
+            location: faker.location.city(),
             jobType: faker.helpers.arrayElement(['Full-time', 'Part-time', 'Contract']),
             position: faker.number.int({ min: 1, max: 10 }),
             company: faker.helpers.arrayElement(companies)._id,
