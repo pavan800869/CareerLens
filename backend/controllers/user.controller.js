@@ -16,7 +16,15 @@ export const register = async (req, res) => {
         };
         const file = req.file;
         const fileUri = getDataUri(file);
-        const cloudResponse = await cloudinary.uploader.upload(fileUri.content);
+        let cloudResponse = null;
+        if (fileUri?.content) {
+            cloudResponse = await cloudinary.uploader.upload(fileUri.content, {
+                resource_type: "image",
+                folder: "careerlens/users/profile-photos",
+                allowed_formats: ["jpg", "jpeg", "png", "webp"],
+                access_mode: "public",
+            });
+        }
 
         const user = await User.findOne({ email });
         if (user) {
@@ -34,7 +42,7 @@ export const register = async (req, res) => {
             password: hashedPassword,
             role,
             profile:{
-                profilePhoto:cloudResponse.secure_url,
+                profilePhoto: cloudResponse?.secure_url || undefined,
             }
         });
 
@@ -44,6 +52,7 @@ export const register = async (req, res) => {
         });
     } catch (error) {
         console.log(error);
+        return res.status(500).json({ message: 'Internal Server Error', success: false });
     }
 }
 export const login = async (req, res) => {
@@ -99,6 +108,7 @@ export const login = async (req, res) => {
         })
     } catch (error) {
         console.log(error);
+        return res.status(500).json({ message: 'Internal Server Error', success: false });
     }
 }
 export const logout = async (req, res) => {
@@ -116,10 +126,17 @@ export const updateProfile = async (req, res) => {
         const { fullname, email, phoneNumber, bio, skills,socials } = req.body;
         
         const file = req.file;
-        // cloudinary ayega idhar
         const fileUri = getDataUri(file);
-        const cloudResponse = await cloudinary.uploader.upload(fileUri.content);
-
+        let cloudResponse = null;
+        if (fileUri?.content) {
+            cloudResponse = await cloudinary.uploader.upload(fileUri.content, {
+                resource_type: "auto",
+                format: "pdf",
+                allowed_formats: ["pdf"],
+                access_mode: "public",
+                folder: "careerlens/users/resumes"
+            });
+        }
 
 
         let skillsArray;
@@ -146,7 +163,9 @@ export const updateProfile = async (req, res) => {
         // resume comes later here...
         if(cloudResponse){
             user.profile.resume = cloudResponse.secure_url // save the cloudinary url
-            user.profile.resumeOriginalName = file.originalname // Save the original file name
+            if (file?.originalname) {
+                user.profile.resumeOriginalName = file.originalname // Save the original file name
+            }
         }
 
 
@@ -168,5 +187,6 @@ export const updateProfile = async (req, res) => {
         })
     } catch (error) {
         console.log(error);
+        return res.status(500).json({ message: 'Internal Server Error', success: false });
     }
 }

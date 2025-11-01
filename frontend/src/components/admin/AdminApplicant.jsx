@@ -5,10 +5,16 @@ const truncateText = (text, maxLength) => {
   return `${text.slice(0, maxLength)}...`;
 };
 
-const ApplicantCard = ({ applicant, insights, rankingScore }) => {
+const ApplicantCard = ({ applicant, insights, rankingScore, onViewProfile }) => {
   const { fullname, email, skills } = applicant;
-  const { relevanceScore, professionalBrand, summary, sentiment } = insights;
-  const { score, explanation, social_profile_insights_details } = rankingScore;
+  const { relevanceScore = 0, professionalBrand = {}, summary = '', sentiment = 'neutral' } = insights || {};
+  const { score = 0, explanation = '', social_profile_insights_details = {} } = rankingScore || {};
+  const { strengths = '', onlineEngagement = '', developmentAreas = '' } = professionalBrand || {};
+  const social = {
+    github: social_profile_insights_details.github || '',
+    linkedin: social_profile_insights_details.linkedin || '',
+    portfolio: social_profile_insights_details.portfolio || ''
+  };
 
   return (
     <div className="bg-white shadow-xl rounded-lg p-6 border border-gray-200 w-full transform transition-all hover:scale-103 hover:shadow-2xl duration-300">
@@ -19,7 +25,7 @@ const ApplicantCard = ({ applicant, insights, rankingScore }) => {
           className={`text-sm font-medium px-2 py-1 rounded-full ${
             sentiment === "positive"
               ? "bg-green-100 text-green-700"
-              : "bg-red-100 text-red-700"
+              : sentiment === 'negative' ? "bg-red-100 text-red-700" : "bg-gray-100 text-gray-700"
           }`}
         >
           {sentiment}
@@ -46,14 +52,14 @@ const ApplicantCard = ({ applicant, insights, rankingScore }) => {
         <div className="mb-4 w-2/3 ">
           <h3 className="text-lg font-semibold text-gray-800 ">Professional Brand:</h3>
           <p className="text-gray-700 text-sm mt-1 font-medium">
-            <strong>Strengths:</strong> {truncateText(professionalBrand.strengths, 50)}
+            <strong>Strengths:</strong> {truncateText(strengths, 50)}
           </p>
           <p className="text-gray-700 text-sm mt-1 font-medium">
-            <strong>Engagement:</strong> {truncateText(professionalBrand.onlineEngagement, 50)}
+            <strong>Engagement:</strong> {truncateText(onlineEngagement, 50)}
           </p>
           <p className="text-gray-700 text-sm mt-1 font-medium">
             <strong>Development Areas:</strong>{" "}
-            {truncateText(professionalBrand.developmentAreas, 50)}
+            {truncateText(developmentAreas, 50)}
           </p>
         </div>
 
@@ -65,7 +71,7 @@ const ApplicantCard = ({ applicant, insights, rankingScore }) => {
           >
             <CircularProgress
               variant="determinate"
-              value={relevanceScore}
+              value={Number(relevanceScore) || 0}
               size={100}
               thickness={4}
               sx={{ color: "#2463EB" }}
@@ -89,7 +95,7 @@ const ApplicantCard = ({ applicant, insights, rankingScore }) => {
                 fontWeight="bold"
                 fontSize={"20px"}
               >
-                {relevanceScore}%
+                {Number(relevanceScore) || 0}%
               </Typography>
             </Box>
           </Box>
@@ -102,13 +108,13 @@ const ApplicantCard = ({ applicant, insights, rankingScore }) => {
         <h3 className="text-lg font-semibold text-gray-800 ">Social Profiles:</h3>
         <ul className="mt-2 text-gray-700 text-sm font-medium">
           <li>
-            <strong>GitHub:</strong> {social_profile_insights_details.github}
+            <strong>GitHub:</strong> {social.github}
           </li>
           <li>
-            <strong>LinkedIn:</strong> {social_profile_insights_details.linkedin}
+            <strong>LinkedIn:</strong> {social.linkedin}
           </li>
           <li>
-            <strong>Portfolio:</strong> {social_profile_insights_details.portfolio}
+            <strong>Portfolio:</strong> {social.portfolio}
           </li>
         </ul>
       </div>
@@ -126,9 +132,14 @@ const ApplicantCard = ({ applicant, insights, rankingScore }) => {
           <h4 className="text-lg font-semibold text-gray-800">Contact:</h4>
           <p className="text-gray-700 text-sm">{email}</p>
         </div>
-        <button className="bg-blue-600 text-white text-sm font-medium px-4 py-2 rounded hover:bg-blue-700 transition-all duration-300">
-          View Full Profile
-        </button>
+        {onViewProfile && (
+          <button 
+            onClick={onViewProfile}
+            className="bg-blue-600 text-white text-sm font-medium px-4 py-2 rounded hover:bg-blue-700 transition-all duration-300"
+          >
+            View Full Profile
+          </button>
+        )}
       </div>
       </div>
     </div>

@@ -25,7 +25,6 @@ const Dashboard = () => {
   return (
     <ThemeProvider theme={theme}>
     <div>
-    <Navbar />
     <div className='flex items-center justify-between mx-auto max-w-7xl'>
     <Box m="20px">
       {/* HEADER */}

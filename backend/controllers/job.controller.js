@@ -12,14 +12,24 @@ export const postJob = async (req, res) => {
                 success: false
             })
         };
+        // Coerce numeric fields safely
+        const parsedSalary = Number(parseFloat(String(salary).toString().replace(/[^0-9.]/g, "")));
+        const experienceMatch = String(experience).match(/\d+(?:\.\d+)?/);
+        const parsedExperience = experienceMatch ? Number(experienceMatch[0]) : NaN;
+        if (Number.isNaN(parsedSalary) || Number.isNaN(parsedExperience)) {
+            return res.status(400).json({
+                message: "Invalid numeric fields: salary or experience.",
+                success: false
+            });
+        }
         const job = await Job.create({
             title,
             description,
             requirements: requirements.split(","),
-            salary: Number(salary),
+            salary: parsedSalary,
             location,
             jobType,
-            experienceLevel: experience,
+            experienceLevel: parsedExperience,
             position,
             company: companyId,
             created_by: userId
@@ -31,6 +41,7 @@ export const postJob = async (req, res) => {
         });
     } catch (error) {
         console.log(error);
+        return res.status(500).json({ message: 'Internal Server Error', success: false });
     }
 }
 // student k liye

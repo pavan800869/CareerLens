@@ -41,8 +41,8 @@ const JobInsights = ({ jobId }) => {
       }
     };
 
-    fetchJobData();
-  }, []);
+    if (jobId) fetchJobData();
+  }, [jobId]);
 
   if (loading) {
     return (
@@ -59,12 +59,12 @@ const JobInsights = ({ jobId }) => {
       <div className="flex flex-col space-y-4">
         <div className="flex justify-between items-center">
           <h2 className="text-2xl font-bold">Job Details</h2>
-          {job.title}
+          {jobData?.title}
         </div>
         {/* description */}
         <div className="flex justify-between items-center">
           <h2 className="text-2xl font-bold">Description</h2>
-          <p>{job.description}</p>
+          <p>{jobData?.description}</p>
         </div>
       </div>
       <h3 className="text-2xl font-semibold mb-4">Applicants</h3>

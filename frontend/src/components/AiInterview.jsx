@@ -4,7 +4,7 @@ import Navbar from './shared/Navbar';
 const AiInterview = () => {
   return (
     <div>
-      <Navbar />
+
       <div className="max-w-9xl mx-20 mt-5" style={{ overflow: "hidden" }}>
         <iframe
           src={"http://localhost:3000/dashboard"}

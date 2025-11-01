@@ -29,13 +29,25 @@ const extractTextFromPdf = (pdfBuffer) => {
 // Function to fetch and parse resumes
 const fetchResumeText = async (resumeUrl) => {
     try {
-        // Fetch the file as a buffer
-        const response = await fetch(resumeUrl);
-        const buffer = await response.arrayBuffer();
-        const fileBuffer = Buffer.from(buffer);
-
+        if (!resumeUrl || typeof resumeUrl !== 'string') {
+            return "";
+        }
         // Determine file type from URL
         const fileType = resumeUrl.split('.').pop().toLowerCase();
+        if (fileType !== 'pdf' && fileType !== 'docx') {
+            return ""; // Unsupported type; skip
+        }
+
+        // Fetch the file as a buffer
+        const response = await fetch(resumeUrl);
+        if (!response || !response.ok) {
+            return "";
+        }
+        const buffer = await response.arrayBuffer();
+        if (!buffer || buffer.byteLength === 0) {
+            return "";
+        }
+        const fileBuffer = Buffer.from(buffer);
 
         let resumeText = "";
 
@@ -46,11 +58,9 @@ const fetchResumeText = async (resumeUrl) => {
             // Parse DOCX
             const docxData = await mammoth.extractRawText({ buffer: fileBuffer });
             resumeText = docxData.value; // Extracted text from DOCX
-        } else {
-            throw new Error("Unsupported file type. Only PDF and DOCX are supported.");
         }
 
-        return resumeText;
+        return typeof resumeText === 'string' ? resumeText : "";
 
     } catch (error) {
         console.error("Error fetching or parsing resume text:", error);

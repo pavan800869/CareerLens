@@ -95,17 +95,22 @@ export const generateJobPathway = async (jobId) => {
     console.log("proper pathway is: ",properPathWay)
 
     // Step 3: Fetch Live Certifications using SerpAPI
-    const query = `Top certifications or courses for ${job.title}`;
-    const searchResults = await getJson({
-      engine: "google",
-      q: query,
-      api_key: process.env.SERP_API_KEY,
-    });
+    let certifications = [];
+    try {
+      const query = `Top certifications or courses for ${job.title}`;
+      const searchResults = await getJson({
+        engine: "google",
+        q: query,
+        api_key: process.env.SERP_API_KEY,
+      });
 
-    const certifications = searchResults?.organic_results?.map((result) => ({
-      title: result.title,
-      link: result.link,
-    }));
+      certifications = searchResults?.organic_results?.map((result) => ({
+        title: result.title,
+        link: result.link,
+      })) || [];
+    } catch (certError) {
+      console.error("Error fetching certifications:", certError);
+    }
 
     // Step 4: Combine and Return Results
     return {
@@ -118,6 +123,7 @@ export const generateJobPathway = async (jobId) => {
       },
       pathStr: initialPathway.text.trim(),
       pathJson: initialPathway,
+      pathParsed: properPathWay, // Include parsed JSON structure
       certifications,
     };
   } catch (error) {
@@ -151,51 +157,64 @@ export const getApplicantsWithAI = async (req, res) => {
     }
 
     // Extract job details for matching
-    const jobRequirements = job.requirements;
+    const jobRequirements = Array.isArray(job.requirements) ? job.requirements : [];
 
     // Process each applicant with AI
     const processedApplicants = await Promise.all(
       job.applications.map(async (application) => {
-        const applicant = application.applicant;
-        const socials = applicant.profile.socialLinks;
+        try {
+          const applicant = application.applicant;
+          const socials = Array.isArray(applicant?.profile?.socialLinks) ? applicant.profile.socialLinks : [];
+          const skills = Array.isArray(applicant?.profile?.skills) ? applicant.profile.skills : [];
 
-        // Parse resume (assuming resumes are stored as URLs)
-        const resumeText = await fetchResumeText(applicant.profile.resume);
+          // Parse resume (assuming resumes are stored as URLs)
+          const resumeUrl = applicant?.profile?.resume || '';
+          const resumeText = resumeUrl ? await fetchResumeText(resumeUrl) : '';
 
-        // Step 1: Generate AI insights
-        const insightsChain = new LLMChain({ llm, prompt: applicationPrompt });
-        const insightsResponse = await insightsChain.call({
-          jobRequirements: jobRequirements.join(", "),
-          skills: applicant.profile.skills.join(", "),
-          resumeText: resumeText,
-          socialProfiles: socials.join(", "),
-        });
+          // Step 1: Generate AI insights
+          const insightsChain = new LLMChain({ llm, prompt: applicationPrompt });
+          const insightsResponse = await insightsChain.call({
+            jobRequirements: jobRequirements.join(", "),
+            skills: skills.join(", "),
+            resumeText: resumeText,
+            socialProfiles: socials.join(", "),
+          });
 
-        const aiInsights = insightsResponse.text.trim();
+          const aiInsights = insightsResponse?.text?.trim() || '';
 
-        const rankingChain = new LLMChain({ llm, prompt: rankingPrompt });
-        const rankingResponse = await rankingChain.call({
-          aiInsights: aiInsights,
-        });
+          const rankingChain = new LLMChain({ llm, prompt: rankingPrompt });
+          const rankingResponse = await rankingChain.call({
+            aiInsights: aiInsights,
+          });
 
-        const rankingScore = rankingResponse.text.trim();
+          const rankingScore = rankingResponse?.text?.trim() || '';
 
-        // Return the structured output
-        return {
-          applicant: {
-            id: applicant._id,
-            fullname: applicant.fullname,
-            email: applicant.email,
-            skills: applicant.profile.skills,
-          },
-          insights: aiInsights,
-          rankingScore: rankingScore,
-        };
+          // Return the structured output
+          return {
+            applicant: {
+              id: applicant._id,
+              fullname: applicant.fullname,
+              email: applicant.email,
+              skills: skills,
+            },
+            insights: aiInsights,
+            rankingScore: rankingScore,
+          };
+        } catch (err) {
+          console.error('Applicant AI processing error:', err);
+          return {
+            applicant: {
+              id: application?.applicant?._id,
+              fullname: application?.applicant?.fullname,
+              email: application?.applicant?.email,
+              skills: Array.isArray(application?.applicant?.profile?.skills) ? application.applicant.profile.skills : [],
+            },
+            insights: '',
+            rankingScore: '',
+          };
+        }
       })
     );
-
-    // Sort applicants by ranking score in descending order
-    processedApplicants.sort((a, b) => b.rankingScore - a.rankingScore);
 
     return res.status(200).json({
       job: {

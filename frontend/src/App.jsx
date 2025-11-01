@@ -1,5 +1,6 @@
-import { createBrowserRouter, RouterProvider } from 'react-router-dom'
+import { createBrowserRouter, RouterProvider, Outlet } from 'react-router-dom'
 import Navbar from './components/shared/Navbar'
+import Footer from './components/shared/Footer'
 import Login from './components/auth/Login'
 import Signup from './components/auth/Signup'
 import Home from './components/Home'
@@ -19,74 +20,43 @@ import AiInterview from './components/AiInterview'
 import JobPathway from './components/JobPathway'
 import 'typeface-poppins';
 
+function Layout() {
+  return (
+    <div className="min-h-screen flex flex-col">
+      <Navbar />
+      <div className="flex-1">
+        <Outlet />
+      </div>
+      <Footer />
+    </div>
+  )
+}
 
 const appRouter = createBrowserRouter([
   {
     path: '/',
-    element: <Home />
-  },
-  {
-    path: '/login',
-    element: <Login />
-  },
-  {
-    path: '/signup',
-    element: <Signup />
-  },
-  {
-    path: "/jobs",
-    element: <Jobs />
-  },
-  {
-    path: "/description/:id",
-    element: <JobDescription />
-  },
-  {
-    path:'/pathway/:id',
-    element: <JobPathway />
-  },
-  {
-    path: "/browse",
-    element: <Browse />
-  },
-  {
-    path: "/profile",
-    element: <Profile />
-  },
-  {
-    path: "/dashboard",
-    element: <Dashboard />
-  },
-  {
-    path: '/ai-mock-interview',
-    element: <AiInterview />
-  },
-  // admin ke liye yha se start hoga
-  {
-    path:"/admin/companies",
-    element: <ProtectedRoute><Companies/></ProtectedRoute>
-  },
-  {
-    path:"/admin/companies/create",
-    element: <ProtectedRoute><CompanyCreate/></ProtectedRoute> 
-  },
-  {
-    path:"/admin/companies/:id",
-    element:<ProtectedRoute><CompanySetup/></ProtectedRoute> 
-  },
-  {
-    path:"/admin/jobs",
-    element:<ProtectedRoute><AdminJobs/></ProtectedRoute> 
-  },
-  {
-    path:"/admin/jobs/create",
-    element:<ProtectedRoute><PostJob/></ProtectedRoute> 
-  },
-  {
-    path:"/admin/jobs/:id/applicants",
-    element:<ProtectedRoute><Applicants/></ProtectedRoute> 
-  },
+    element: <Layout />,
+    children: [
+      { index: true, element: <Home /> },
+      { path: 'login', element: <Login /> },
+      { path: 'signup', element: <Signup /> },
+      { path: 'jobs', element: <Jobs /> },
+      { path: 'description/:id', element: <JobDescription /> },
+      { path: 'pathway/:id', element: <JobPathway /> },
+      { path: 'browse', element: <Browse /> },
+      { path: 'profile', element: <Profile /> },
+      { path: 'dashboard', element: <Dashboard /> },
+      { path: 'ai-mock-interview', element: <AiInterview /> },
 
+      // Admin
+      { path: 'admin/companies', element: <ProtectedRoute><Companies/></ProtectedRoute> },
+      { path: 'admin/companies/create', element: <ProtectedRoute><CompanyCreate/></ProtectedRoute> },
+      { path: 'admin/companies/:id', element: <ProtectedRoute><CompanySetup/></ProtectedRoute> },
+      { path: 'admin/jobs', element: <ProtectedRoute><AdminJobs/></ProtectedRoute> },
+      { path: 'admin/jobs/create', element: <ProtectedRoute><PostJob/></ProtectedRoute> },
+      { path: 'admin/jobs/:id/applicants', element: <ProtectedRoute><Applicants/></ProtectedRoute> },
+    ]
+  }
 ])
 function App() {
 
