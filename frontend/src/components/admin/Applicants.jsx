@@ -1,5 +1,4 @@
 import React, { useEffect } from 'react'
-import Navbar from '../shared/Navbar'
 import ApplicantsTable from './ApplicantsTable'
 import axios from 'axios';
 import { APPLICATION_API_END_POINT } from '@/utils/constant';
@@ -24,8 +23,11 @@ const Applicants = () => {
         fetchAllApplicants();
     }, []);
     return (
-        <div>
-            <ApplicantsTable />
+        <div className='max-w-6xl mx-auto my-10 px-4 fade-in'>
+            <h1 className='font-semibold text-xl text-foreground mb-6'>Applicants</h1>
+            <div className='glass-card p-4'>
+                <ApplicantsTable />
+            </div>
         </div>
     )
 }

@@ -27,29 +27,49 @@ const llm = new ChatGroq({
 });
 
 function parseToJson(input) {
-  const sections = input.split(/\n(?=\*\*)/).filter(Boolean);
-  const result = {};
+  try {
+    // First, try to parse as pure JSON
+    const cleaned = input
+      .replace(/^```json\s*/i, '')
+      .replace(/```\s*$/i, '')
+      .replace(/^```\s*/i, '')
+      .trim();
+    
+    const parsed = JSON.parse(cleaned);
+    if (typeof parsed === 'object' && parsed !== null) {
+      return parsed;
+    }
+  } catch (jsonError) {
+    console.log('Direct JSON parse failed, trying fallback:', jsonError.message);
+  }
 
-  // biome-ignore lint/complexity/noForEach: <explanation>
-  sections.forEach((section) => {
-    const [headerLine, ...contentLines] = section.split("\n").filter(Boolean);
-    const header = headerLine.replace(/\*\*/g, "").trim(); // Extract the header
-    const content = contentLines.map((line) => {
-      if (line.startsWith("- **")) {
-        // For Timeline key-value items
-        const [key, value] = line
-          .slice(2)
-          .split(":")
-          .map((str) => str.trim());
-        return { [key]: value };
-      }
-      return line.replace(/^- /, "").trim(); // For regular list items
+  // Fallback: Try to parse markdown format if JSON fails
+  try {
+    const sections = input.split(/\n(?=\*\*)/).filter(Boolean);
+    const result = {};
+
+    sections.forEach((section) => {
+      const [headerLine, ...contentLines] = section.split("\n").filter(Boolean);
+      const header = headerLine.replace(/\*\*/g, "").trim();
+      const content = contentLines.map((line) => {
+        if (line.startsWith("- **")) {
+          const [key, value] = line
+            .slice(2)
+            .split(":")
+            .map((str) => str.trim());
+          return { [key]: value };
+        }
+        return line.replace(/^- /, "").trim();
+      });
+
+      result[header] = content.flat();
     });
 
-    result[header] = content.flat();
-  });
-
-  return result;
+    return Object.keys(result).length > 0 ? result : null;
+  } catch (fallbackError) {
+    console.error('All parsing attempts failed:', fallbackError.message);
+    return null;
+  }
 }
 
 // LangChain PromptTemplate setup
@@ -75,6 +95,24 @@ export const generateJobPathway = async (jobId) => {
     const job = await Job.findById(jobId);
     if (!job) throw new Error("Job not found");
 
+    // Check if pathway is already generated and cached in the database
+    if (job.careerPathway && Object.keys(job.careerPathway).length > 0) {
+      console.log("Returning cached career pathway for job:", job._id);
+      return {
+        status: "success",
+        job: {
+          id: job._id,
+          title: job.title,
+          description: job.description,
+          requirements: job.requirements,
+        },
+        pathStr: "", // Raw string not cached, but UI relies mostly on pathParsed
+        pathJson: { text: JSON.stringify(job.careerPathway) },
+        pathParsed: job.careerPathway,
+        certifications: job.certifications || [],
+      };
+    }
+
     // Step 2: Generate Career Pathway using LangChain
     const chain = new LLMChain({ llm, prompt });
     const initialPathway = await chain.call({
@@ -82,8 +120,6 @@ export const generateJobPathway = async (jobId) => {
       description: job.description,
       requirements: job.requirements.join(", "),
     });
-
-    // console.log("Initial Pathway is: ",initialPathway)
 
     // Validate the initialPathway response
     if (!initialPathway || !initialPathway.text) {
@@ -110,6 +146,14 @@ export const generateJobPathway = async (jobId) => {
       })) || [];
     } catch (certError) {
       console.error("Error fetching certifications:", certError);
+    }
+
+    // Cache the generated pathway and certifications into the database
+    if (properPathWay) {
+      job.careerPathway = properPathWay;
+      job.certifications = certifications;
+      await job.save();
+      console.log("Saved newly generated career pathway to database for job:", job._id);
     }
 
     // Step 4: Combine and Return Results
@@ -139,6 +183,7 @@ export const generateJobPathway = async (jobId) => {
 export const getApplicantsWithAI = async (req, res) => {
   try {
     const jobId = req.params.id;
+    const forceRefresh = req.query.refresh === 'true' || req.query.refresh === true; // Allow force refresh via query param
 
     // Fetch job and applicants
     const job = await Job.findById(jobId).populate({
@@ -159,62 +204,122 @@ export const getApplicantsWithAI = async (req, res) => {
     // Extract job details for matching
     const jobRequirements = Array.isArray(job.requirements) ? job.requirements : [];
 
-    // Process each applicant with AI
-    const processedApplicants = await Promise.all(
-      job.applications.map(async (application) => {
-        try {
-          const applicant = application.applicant;
-          const socials = Array.isArray(applicant?.profile?.socialLinks) ? applicant.profile.socialLinks : [];
-          const skills = Array.isArray(applicant?.profile?.skills) ? applicant.profile.skills : [];
+    // Process each applicant with AI sequentially to avoid rate limits
+    const processedApplicants = [];
+    for (let i = 0; i < job.applications.length; i++) {
+      const application = job.applications[i];
+      
+      try {
+        const applicant = application.applicant;
+        const socials = Array.isArray(applicant?.profile?.socialLinks) ? applicant.profile.socialLinks : [];
+        const skills = Array.isArray(applicant?.profile?.skills) ? applicant.profile.skills : [];
 
+        // Check if AI insights are already cached (within last 24 hours)
+        const applicationDoc = await Application.findById(application._id);
+        const cacheAge = applicationDoc?.aiInsightsGeneratedAt 
+          ? (Date.now() - new Date(applicationDoc.aiInsightsGeneratedAt).getTime()) / (1000 * 60 * 60) // hours
+          : Infinity;
+        
+        // Use cache if it exists, is less than 24 hours old, and force refresh is not requested
+        const useCache = !forceRefresh && applicationDoc?.aiInsights && applicationDoc?.aiRankingScore && cacheAge < 24;
+        
+        let aiInsights = '';
+        let rankingScore = '';
+
+        if (useCache) {
+          console.log(`Using cached AI insights for applicant ${applicant?._id} (age: ${cacheAge.toFixed(2)} hours)`);
+          aiInsights = applicationDoc.aiInsights;
+          rankingScore = applicationDoc.aiRankingScore;
+        } else {
+          console.log(`Generating new AI insights for applicant ${applicant?._id}...`);
+          
           // Parse resume (assuming resumes are stored as URLs)
           const resumeUrl = applicant?.profile?.resume || '';
-          const resumeText = resumeUrl ? await fetchResumeText(resumeUrl) : '';
+          const resumeOriginalName = applicant?.profile?.resumeOriginalName || '';
+          const resumeText = resumeUrl ? await fetchResumeText(resumeUrl, resumeOriginalName) : '';
+          
+          if (!resumeText) {
+            console.warn(`No resume text extracted for applicant ${applicant?._id}. URL: ${resumeUrl}`);
+          } else {
+            console.log(`Resume text extracted for applicant ${applicant?._id}: ${resumeText.length} characters`);
+            console.log(`Resume text preview (first 200 chars): ${resumeText.substring(0, 200)}`);
+          }
+
+          // Prepare inputs for AI - truncate resume text if too long (LLM context limits)
+          // Most LLMs have token limits, so we'll use first 3000 characters of resume text
+          const truncatedResumeText = resumeText ? resumeText.substring(0, 3000) : '';
+          if (resumeText && resumeText.length > 3000) {
+            console.log(`Resume text truncated from ${resumeText.length} to 3000 characters for AI processing`);
+          }
 
           // Step 1: Generate AI insights
+          console.log(`Generating AI insights for applicant ${applicant?._id}...`);
           const insightsChain = new LLMChain({ llm, prompt: applicationPrompt });
           const insightsResponse = await insightsChain.call({
             jobRequirements: jobRequirements.join(", "),
             skills: skills.join(", "),
-            resumeText: resumeText,
+            resumeText: truncatedResumeText || resumeText,
             socialProfiles: socials.join(", "),
           });
 
-          const aiInsights = insightsResponse?.text?.trim() || '';
+          console.log(`AI insights generated for applicant ${applicant?._id}. Response length: ${insightsResponse?.text?.length || 0}`);
+          console.log(`AI insights preview (first 300 chars): ${insightsResponse?.text?.substring(0, 300) || 'No response'}`);
 
+          aiInsights = insightsResponse?.text?.trim() || '';
+
+          // Add delay to avoid rate limits
+          await new Promise(resolve => setTimeout(resolve, 100));
+
+          console.log(`Generating ranking score for applicant ${applicant?._id}...`);
           const rankingChain = new LLMChain({ llm, prompt: rankingPrompt });
           const rankingResponse = await rankingChain.call({
             aiInsights: aiInsights,
           });
 
-          const rankingScore = rankingResponse?.text?.trim() || '';
+          rankingScore = rankingResponse?.text?.trim() || '';
+          console.log(`Ranking score generated for applicant ${applicant?._id}. Response length: ${rankingScore.length}`);
+          console.log(`Ranking score preview (first 200 chars): ${rankingScore.substring(0, 200) || 'No response'}`);
 
-          // Return the structured output
-          return {
-            applicant: {
-              id: applicant._id,
-              fullname: applicant.fullname,
-              email: applicant.email,
-              skills: skills,
-            },
-            insights: aiInsights,
-            rankingScore: rankingScore,
-          };
-        } catch (err) {
-          console.error('Applicant AI processing error:', err);
-          return {
-            applicant: {
-              id: application?.applicant?._id,
-              fullname: application?.applicant?.fullname,
-              email: application?.applicant?.email,
-              skills: Array.isArray(application?.applicant?.profile?.skills) ? application.applicant.profile.skills : [],
-            },
-            insights: '',
-            rankingScore: '',
-          };
+          // Cache the AI-generated data in the database
+          if (applicationDoc) {
+            applicationDoc.aiInsights = aiInsights;
+            applicationDoc.aiRankingScore = rankingScore;
+            applicationDoc.aiInsightsGeneratedAt = new Date();
+            await applicationDoc.save();
+            console.log(`Cached AI insights for applicant ${applicant?._id}`);
+          }
         }
-      })
-    );
+
+        // Return the structured output
+        processedApplicants.push({
+          applicant: {
+            id: applicant._id,
+            fullname: applicant.fullname,
+            email: applicant.email,
+            skills: skills,
+          },
+          insights: aiInsights,
+          rankingScore: rankingScore,
+        });
+      } catch (err) {
+        console.error('Applicant AI processing error:', err);
+        processedApplicants.push({
+          applicant: {
+            id: application?.applicant?._id,
+            fullname: application?.applicant?.fullname,
+            email: application?.applicant?.email,
+            skills: Array.isArray(application?.applicant?.profile?.skills) ? application.applicant.profile.skills : [],
+          },
+          insights: '',
+          rankingScore: '',
+        });
+      }
+
+      // Add delay between applicants to respect rate limits
+      if (i < job.applications.length - 1) {
+        await new Promise(resolve => setTimeout(resolve, 200));
+      }
+    }
 
     return res.status(200).json({
       job: {

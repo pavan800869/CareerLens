@@ -1,56 +1,31 @@
 import { ResponsiveLine } from "@nivo/line";
-import { useTheme } from "@mui/material";
-import { tokens } from "./theme";
 import { mockLineData as data } from "./data/mockData";
 
-const LineChart = ({ isCustomLineColors = false, isDashboard = false }) => {
-  const theme = useTheme();
-  const colors = tokens(theme.palette.mode);
-
+const LineChart = () => {
   return (
     <ResponsiveLine
       data={data}
       theme={{
         axis: {
-          domain: {
-            line: {
-              stroke: colors.grey[100],
-            },
-          },
-          legend: {
-            text: {
-              fill: colors.grey[100],
-            },
-          },
+          domain: { line: { stroke: "rgba(255,255,255,0.1)" } },
+          legend: { text: { fill: "#a1a1aa" } },
           ticks: {
-            line: {
-              stroke: colors.grey[100],
-              strokeWidth: 1,
-            },
-            text: {
-              fill: colors.grey[100],
-            },
+            line: { stroke: "rgba(255,255,255,0.1)", strokeWidth: 1 },
+            text: { fill: "#a1a1aa" },
           },
         },
-        legends: {
-          text: {
-            fill: colors.grey[100],
-          },
-        },
-        tooltip: {
-          container: {
-            color: colors.primary[500],
-          },
-        },
+        legends: { text: { fill: "#a1a1aa" } },
+        tooltip: { container: { color: "#12151F", background: "#ffffff" } },
+        grid: { line: { stroke: "rgba(255,255,255,0.05)" } }
       }}
-      colors={isDashboard ? { datum: "color" } : { scheme: "nivo" }} // added
-      margin={{ top: 50, right: 110, bottom: 50, left: 60 }}
+      colors={({ color }) => color}
+      margin={{ top: 10, right: 20, bottom: 40, left: 40 }}
       xScale={{ type: "point" }}
       yScale={{
         type: "linear",
         min: "auto",
         max: "auto",
-        stacked: true,
+        stacked: false,
         reverse: false,
       }}
       yFormat=" >-.2f"
@@ -60,24 +35,24 @@ const LineChart = ({ isCustomLineColors = false, isDashboard = false }) => {
       axisBottom={{
         orient: "bottom",
         tickSize: 0,
-        tickPadding: 5,
+        tickPadding: 10,
         tickRotation: 0,
-        legend: isDashboard ? undefined : "transportation", // added
-        legendOffset: 36,
+        legend: "Month",
+        legendOffset: 30,
         legendPosition: "middle",
       }}
       axisLeft={{
         orient: "left",
-        tickValues: 5, // added
-        tickSize: 3,
-        tickPadding: 5,
+        tickValues: 5,
+        tickSize: 0,
+        tickPadding: 10,
         tickRotation: 0,
-        legend: isDashboard ? undefined : "count", // added
-        legendOffset: -40,
+        legend: "Users",
+        legendOffset: -35,
         legendPosition: "middle",
       }}
       enableGridX={false}
-      enableGridY={false}
+      enableGridY={true}
       pointSize={8}
       pointColor={{ theme: "background" }}
       pointBorderWidth={2}

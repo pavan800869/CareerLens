@@ -47,6 +47,14 @@ const jobSchema = new mongoose.Schema({
             type: mongoose.Schema.Types.ObjectId,
             ref: 'Application',
         }
-    ]
+    ],
+    careerPathway: {
+        type: Object,
+        default: null
+    },
+    certifications: {
+        type: Array,
+        default: []
+    }
 },{timestamps:true});
 export const Job = mongoose.model("Job", jobSchema);

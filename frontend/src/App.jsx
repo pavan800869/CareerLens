@@ -18,7 +18,10 @@ import ProtectedRoute from './components/admin/ProtectedRoute'
 import Dashboard from './components/dashboard/Dashboard'
 import AiInterview from './components/AiInterview'
 import JobPathway from './components/JobPathway'
-import 'typeface-poppins';
+import InterviewSetup from './components/interview/InterviewSetup'
+import StartInterview from './components/interview/StartInterview'
+import Feedback from './components/interview/Feedback'
+import UserProtectedRoute from './components/auth/UserProtectedRoute'
 
 function Layout() {
   return (
@@ -46,8 +49,10 @@ const appRouter = createBrowserRouter([
       { path: 'browse', element: <Browse /> },
       { path: 'profile', element: <Profile /> },
       { path: 'dashboard', element: <Dashboard /> },
-      { path: 'ai-mock-interview', element: <AiInterview /> },
-
+      { path: 'ai-mock-interview', element: <UserProtectedRoute><AiInterview /></UserProtectedRoute> },
+      { path: 'ai-mock-interview/:id', element: <UserProtectedRoute><InterviewSetup /></UserProtectedRoute> },
+      { path: 'ai-mock-interview/:id/start', element: <UserProtectedRoute><StartInterview /></UserProtectedRoute> },
+      { path: 'ai-mock-interview/:id/feedback', element: <UserProtectedRoute><Feedback /></UserProtectedRoute> },
       // Admin
       { path: 'admin/companies', element: <ProtectedRoute><Companies/></ProtectedRoute> },
       { path: 'admin/companies/create', element: <ProtectedRoute><CompanyCreate/></ProtectedRoute> },

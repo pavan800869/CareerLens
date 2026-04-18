@@ -1,371 +1,162 @@
 import React from 'react'
-import Navbar from '../shared/Navbar'
-import { Box, Button, IconButton, Typography, useTheme } from "@mui/material";
-import LineChart from './LineChart';
-import GeographyChart from "./GeographyChart";
-import BarChart from "./BarChart";
-import StatBox from "./StatBox";
-import ProgressCircle from "./ProgressCircle";
-import Header from './Header';
-import { tokens } from "./theme";
-import DownloadOutlinedIcon from "@mui/icons-material/DownloadOutlined";
-import EmailIcon from "@mui/icons-material/Email";
-import PointOfSaleIcon from "@mui/icons-material/PointOfSale";
-import PersonAddIcon from "@mui/icons-material/PersonAdd";
-import TrafficIcon from "@mui/icons-material/Traffic";
+import { Briefcase, BookOpen, CalendarCheck, Trophy, Download, TrendingUp, MapPin, BarChart3 } from 'lucide-react';
 import { mockTransactions } from "./data/mockData";
-import { ThemeProvider } from "@mui/material";
-
+import LineChart from "./LineChart";
+import BarChart from "./BarChart";
+import GeographyChart from "./GeographyChart";
+const StatCard = ({ icon, title, subtitle, progress, increase }) => (
+  <div className="glass-card p-5 card-hover">
+    <div className="flex items-center justify-between mb-3">
+      <div className="w-10 h-10 rounded-lg bg-neon-purple/10 flex items-center justify-center">
+        {icon}
+      </div>
+      <span className="badge-green text-[10px] px-2 py-0.5 rounded-full">{increase}</span>
+    </div>
+    <h3 className="text-2xl font-bold text-foreground">{title}</h3>
+    <p className="text-xs text-muted-foreground mt-0.5">{subtitle}</p>
+    {/* Progress bar */}
+    <div className="w-full h-1 bg-accent rounded-full mt-3 overflow-hidden">
+      <div className="h-full bg-gradient-to-r from-neon-purple to-neon-cyan rounded-full transition-all" style={{ width: `${progress * 100}%` }}></div>
+    </div>
+  </div>
+);
 
 const Dashboard = () => {
-
-  const theme = useTheme();
-  const colors = tokens(theme.palette.mode);
-
   return (
-    <ThemeProvider theme={theme}>
-    <div>
-    <div className='flex items-center justify-between mx-auto max-w-7xl'>
-    <Box m="20px">
-      {/* HEADER */}
-      <Box display="flex" justifyContent="space-between" alignItems="center">
-        <Header title="Dashboard" subtitle="Welcome to your dashboard" />
-        <Box>
-          <Button
-            sx={{
-              backgroundColor: "#6937c2",
-              color: "white",
-              fontSize: "14px",
-              fontWeight: "semibold",
-              padding: "10px 20px",
-              fontFamily: "Poppins, sans-serif"
-            }}
-          >
-            <DownloadOutlinedIcon sx={{ mr: "10px", color: "white" }} />
-            Download Reports
-          </Button>
-        </Box>
-      </Box>
+    <div className="max-w-7xl mx-auto px-4 py-8 fade-in">
+      {/* Header */}
+      <div className="flex items-center justify-between mb-8">
+        <div>
+          <h1 className="text-2xl font-bold text-foreground">Dashboard</h1>
+          <p className="text-muted-foreground text-sm mt-0.5">Welcome to your dashboard</p>
+        </div>
+        <button className="gradient-btn text-white text-sm font-medium px-5 py-2.5 rounded-lg flex items-center gap-2">
+          <Download className="w-4 h-4" /> Download Reports
+        </button>
+      </div>
 
-      {/* GRID & CHARTS */}
-      <Box
-  display="grid"
-  gridTemplateColumns="repeat(12, 1fr)"
-  gridAutoRows="140px"
-  gap="20px"
->
-  {/* ROW 1 */}
-  <Box
-    gridColumn="span 3"
-    display="flex"
-    alignItems="center"
-    justifyContent="center"
-    sx={{
-      border: "1px solid #e0e0e0", // Light gray border
-      boxShadow: "0 2px 4px rgba(0, 0, 0, 0.1)", // Subtle shadow
-      borderRadius: "8px", // Optional rounded corners
-      backgroundColor: "white", // Ensure a white background
-    }}
-  >
-    <StatBox
-      title="15,045"
-      subtitle="Internships Applied"
-      progress="0.75"
-      increase="+10%"
-      icon={
-        <PersonAddIcon
-          sx={{ color: "black", fontSize: "26px" }}
+      {/* Stats Row */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
+        <StatCard
+          icon={<Briefcase className="w-5 h-5 text-neon-purple" />}
+          title="15,045"
+          subtitle="Internships Applied"
+          progress={0.75}
+          increase="+10%"
         />
-      }
-    />
-  </Box>
-  <Box
-    gridColumn="span 3"
-    display="flex"
-    alignItems="center"
-    justifyContent="center"
-    sx={{
-      border: "1px solid #e0e0e0",
-      boxShadow: "0 2px 4px rgba(0, 0, 0, 0.1)",
-      borderRadius: "8px",
-      backgroundColor: "white",
-    }}
-  >
-    <StatBox
-      title="80"
-      subtitle="Skills Added"
-      progress="0.50"
-      increase="+30%"
-      icon={
-        <EmailIcon
-          sx={{ color: "black", fontSize: "26px" }}
+        <StatCard
+          icon={<BookOpen className="w-5 h-5 text-neon-cyan" />}
+          title="80"
+          subtitle="Skills Added"
+          progress={0.50}
+          increase="+30%"
         />
-      }
-    />
-  </Box>
-  <Box
-    gridColumn="span 3"
-    display="flex"
-    alignItems="center"
-    justifyContent="center"
-    sx={{
-      border: "1px solid #e0e0e0",
-      boxShadow: "0 2px 4px rgba(0, 0, 0, 0.1)",
-      borderRadius: "8px",
-      backgroundColor: "white",
-    }}
-  >
-    <StatBox
-      title="5"
-      subtitle="Interviews Scheduled"
-      progress="0.65"
-      increase="+15%"
-      icon={
-        <PointOfSaleIcon
-          sx={{ color: "black", fontSize: "26px" }}
+        <StatCard
+          icon={<CalendarCheck className="w-5 h-5 text-neon-orange" />}
+          title="5"
+          subtitle="Interviews Scheduled"
+          progress={0.65}
+          increase="+15%"
         />
-      }
-    />
-  </Box>
-  <Box
-    gridColumn="span 3"
-    display="flex"
-    alignItems="center"
-    justifyContent="center"
-    sx={{
-      border: "1px solid #e0e0e0",
-      boxShadow: "0 2px 4px rgba(0, 0, 0, 0.1)",
-      borderRadius: "8px",
-      backgroundColor: "white",
-    }}
-  >
-    <StatBox
-      borderRadius="12px"
-      title="12"
-      subtitle="Offers Received"
-      progress="0.80"
-      increase="+25%"
-      icon={
-        <TrafficIcon
-          sx={{ color: "black", fontSize: "26px" }}
+        <StatCard
+          icon={<Trophy className="w-5 h-5 text-emerald-400" />}
+          title="12"
+          subtitle="Offers Received"
+          progress={0.80}
+          increase="+25%"
         />
-      }
-    />
-  </Box>
+      </div>
 
+      {/* Row 2 */}
+      <div className="grid grid-cols-1 lg:grid-cols-12 gap-4 mb-6">
+        {/* Chart area */}
+        <div className="lg:col-span-8 glass-card p-5">
+          <div className="flex items-center justify-between mb-4">
+            <div>
+              <h2 className="text-sm font-semibold text-foreground">Most Growing Domains</h2>
+              <p className="text-xs text-slate-500 mt-0.5">Trending career fields this quarter</p>
+            </div>
+            <button className="w-8 h-8 rounded-lg bg-accent flex items-center justify-center text-emerald-400 hover:bg-secondary transition-colors">
+              <TrendingUp className="w-4 h-4" />
+            </button>
+          </div>
+          {/* Chart placeholder — keeping existing nivo charts if available */}
+          <div className="h-64 rounded-lg bg-white/[0.02] border border-border p-2">
+            <LineChart />
+          </div>
+        </div>
 
+        {/* Recent Applications */}
+        <div className="lg:col-span-4 glass-card overflow-hidden">
+          <div className="p-4 border-b border-border">
+            <h2 className="text-sm font-semibold text-foreground">Recent Applications</h2>
+          </div>
+          <div className="max-h-[300px] overflow-y-auto scrollbar-thin scrollbar-thumb-white/10">
+            {mockTransactions.map((transaction, i) => (
+              <div
+                key={`${transaction.txId}-${i}`}
+                className={`flex items-center justify-between p-3 ${i !== mockTransactions.length - 1 ? 'border-b border-border' : ''} ${i % 2 === 0 ? 'bg-white/[0.01]' : ''}`}
+              >
+                <div className="min-w-0 flex-1">
+                  <p className="text-sm text-foreground font-medium truncate">{transaction.txId}</p>
+                  <p className="text-xs text-slate-500">{transaction.user}</p>
+                </div>
+                <span className="text-xs text-slate-500 mx-3 flex-shrink-0">{transaction.date}</span>
+                <span className={`text-[10px] px-2 py-0.5 rounded-full flex-shrink-0 ${
+                  transaction.status === "Offer Received" 
+                    ? 'badge-green' 
+                    : 'badge-yellow'
+                }`}>
+                  {transaction.status}
+                </span>
+              </div>
+            ))}
+          </div>
+        </div>
+      </div>
 
-        {/* ROW 2 */}
-        <Box
-  gridColumn="span 8"
-  gridRow="span 2"
-  sx={{
-    border: "1px solid #e0e0e0", // Light gray border
-    boxShadow: "0 2px 4px rgba(0, 0, 0, 0.1)", // Subtle shadow
-    borderRadius: "8px", // Rounded corners
-    backgroundColor: "white", // White background for clarity
-  }}
->
-  <Box
-    mt="25px"
-    p="0 30px"
-    display="flex"
-    justifyContent="space-between"
-    alignItems="center"
-  >
-    <Box>
-      <Typography variant="h5" fontWeight="500" color={"gray"} sx={{ fontFamily: "Poppins, sans-serif" }}>
-        Most Growing Domains
-      </Typography>
-    </Box>
-    <Box>
-      <IconButton>
-        <DownloadOutlinedIcon
-          sx={{ fontSize: "26px", color: "#4CAF50" }} // Green icon for positive metric
-        />
-      </IconButton>
-    </Box>
-  </Box>
-  <Box height="250px" m="-20px 0 0 0">
-    <LineChart isDashboard={true} /> {/* Updated chart to track domain trends */}
-  </Box>
-</Box>
+      {/* Row 3 */}
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
+        {/* Progress */}
+        <div className="glass-card p-6 text-center">
+          <h3 className="text-sm font-medium text-foreground mb-4">Application Progress</h3>
+          {/* Custom progress circle */}
+          <div className="relative w-28 h-28 mx-auto mb-4">
+            <svg className="w-28 h-28 transform -rotate-90" viewBox="0 0 120 120">
+              <circle cx="60" cy="60" r="52" fill="none" stroke="rgba(255,255,255,0.05)" strokeWidth="8" />
+              <circle cx="60" cy="60" r="52" fill="none" stroke="url(#gradient)" strokeWidth="8" strokeDasharray="326.7" strokeDashoffset="81.7" strokeLinecap="round" />
+              <defs>
+                <linearGradient id="gradient" x1="0%" y1="0%" x2="100%" y2="0%">
+                  <stop offset="0%" stopColor="#7C3AED" />
+                  <stop offset="100%" stopColor="#06B6D4" />
+                </linearGradient>
+              </defs>
+            </svg>
+            <div className="absolute inset-0 flex items-center justify-center">
+              <span className="text-xl font-bold text-foreground">75%</span>
+            </div>
+          </div>
+          <p className="text-emerald-400 text-sm font-medium">15 Applications Sent</p>
+          <p className="text-slate-500 text-xs mt-1">5 Interviews, 2 Offers</p>
+        </div>
 
+        {/* Bar chart */}
+        <div className="glass-card p-5">
+          <h3 className="text-sm font-medium text-foreground mb-4">Application Volume</h3>
+          <div className="h-52 pt-4">
+            <BarChart />
+          </div>
+        </div>
 
-<Box
-  gridColumn="span 4"
-  gridRow="span 2"
-  overflow="auto"
-  sx={{
-    border: "1px solid #e0e0e0",
-    boxShadow: "0 2px 4px rgba(0, 0, 0, 0.1)",
-    borderRadius: "8px",
-    backgroundColor: "white",
-    "::-webkit-scrollbar": {
-      display: "none",
-    },
-    msOverflowStyle: "none",
-    scrollbarWidth: "none",
-  }}
->
-  <Box
-    display="flex"
-    justifyContent="space-between"
-    alignItems="center"
-    borderBottom="2px solid #e0e0e0"
-    p="15px"
-  >
-    <Typography color={"black"} variant="h5" fontWeight="500" sx={{ fontFamily: "Poppins, sans-serif" }}>
-      Recent Internship Applications
-    </Typography>
-  </Box>
-  {mockTransactions.map((transaction, i) => (
-    <Box
-      key={`${transaction.txId}-${i}`}
-      display="flex"
-      justifyContent="space-between"
-      alignItems="center"
-      p="15px"
-      sx={{
-        borderBottom: i !== mockTransactions.length - 1 ? "1px solid #e0e0e0" : "none",
-        backgroundColor: i % 2 === 0 ? "#f9f9f9" : "white", // Alternating row colors for better readability
-      }}
-    >
-      <Box>
-        <Typography
-          color={"black"}
-          fontWeight="500"
-          sx={{ px: 2, fontSize: "16px" }}
-        >
-          {transaction.txId}
-        </Typography>
-        <Typography sx={{ px: 2, fontFamily: "Poppins, sans-serif" }}>
-          {transaction.user}
-        </Typography>
-      </Box>
-      <Box fontWeight="600" color={"gray"} sx={{ fontFamily: "Poppins, sans-serif" }}>
-        {transaction.date}
-      </Box>
-      <Box
-        sx={{
-          backgroundColor: transaction.status === "Offer Received" ? "#4CAF50" : "#FF9800", // Green for "Offer Received", Orange for other statuses
-          color: "white",
-          p: "5px 10px",
-          borderRadius: "4px",
-          fontSize: "14px",
-          fontWeight: "400"
-        }}
-      >
-        {transaction.status}
-      </Box>
-    </Box>
-  ))}
-</Box>
-
-
-
-
-        {/* ROW 3 */}
-        <Box
-  gridColumn="span 4"
-  gridRow="span 2"
-  p="30px"
-  sx={{
-    border: "1px solid #e0e0e0", 
-    boxShadow: "0 2px 4px rgba(0, 0, 0, 0.1)", 
-    borderRadius: "8px", 
-    backgroundColor: "white", 
-    "::-webkit-scrollbar": {
-      display: "none", 
-    },
-    msOverflowStyle: "none", 
-    scrollbarWidth: "none", 
-  }}
->
-  <Typography variant="h6" fontWeight="500" sx={{fontFamily: "Poppins, sans-serif"}}>
-    Internship Applications Progress
-  </Typography>
-  <Box
-    display="flex"
-    flexDirection="column"
-    alignItems="center"
-    mt="25px"
-  >
-    <ProgressCircle size="125" />
-    <Typography
-      variant="h5"
-      color={colors.greenAccent[500]}
-      sx={{ mt: "15px", fontFamily: "Poppins, sans-serif" }}
-    >
-      15 Applications Sent
-    </Typography>
-    <Typography sx={{fontFamily: "Poppins, sans-serif"}}>5 Interviews Scheduled, 2 Offers Received</Typography>
-  </Box>
-</Box>
-
-
-<Box
-  gridColumn="span 4"
-  gridRow="span 2"
-  sx={{
-    border: "1px solid #e0e0e0", // Light gray border
-    boxShadow: "0 2px 4px rgba(0, 0, 0, 0.1)", // Subtle shadow
-    borderRadius: "8px", // Rounded corners
-    backgroundColor: "white", // White background for clarity
-    "::-webkit-scrollbar": {
-      display: "none", // Hide scrollbar for WebKit-based browsers
-    },
-    msOverflowStyle: "none", // Hide scrollbar for IE and Edge
-    scrollbarWidth: "none", // Hide scrollbar for Firefox
-  }}
->
-  <Typography
-    variant="h5"
-    fontWeight="500"
-    sx={{ padding: "30px 30px 0 30px", fontFamily: "Poppins, sans-serif" }}
-  >
-    Sales Quantity
-  </Typography>
-  <Box height="250px" mt="-20px">
-    <BarChart isDashboard={true} />
-  </Box>
-</Box>
-
-<Box
-  gridColumn="span 4"
-  gridRow="span 2"
-  padding="30px"
-  sx={{
-    border: "1px solid #e0e0e0", // Light gray border
-    boxShadow: "0 2px 4px rgba(0, 0, 0, 0.1)", // Subtle shadow
-    borderRadius: "8px", // Rounded corners
-    backgroundColor: "white", // White background for clarity
-    "::-webkit-scrollbar": {
-      display: "none", // Hide scrollbar for WebKit-based browsers
-    },
-    msOverflowStyle: "none", // Hide scrollbar for IE and Edge
-    scrollbarWidth: "none", // Hide scrollbar for Firefox
-  }}
->
-  <Typography
-    variant="h5"
-    fontWeight="500"
-    sx={{ marginBottom: "15px", fontFamily: "Poppins, sans-serif" }}
-  >
-    Applicants Based on areas
-  </Typography>
-  <Box height="200px">
-    <GeographyChart isDashboard={true} />
-  </Box>
-</Box>
-
-      </Box>
-    </Box>
+        {/* Geography chart */}
+        <div className="glass-card p-5">
+          <h3 className="text-sm font-medium text-foreground mb-4">Applicants by Region</h3>
+          <div className="h-52 rounded-lg bg-white/[0.02] border border-border overflow-hidden">
+            <GeographyChart />
+          </div>
+        </div>
+      </div>
     </div>
-
-
-</div>
-</ThemeProvider>
   )
 }
 

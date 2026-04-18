@@ -29,21 +29,21 @@ const FilterCard = () => {
         dispatch(setSearchedQuery(selectedValue));
     },[selectedValue]);
     return (
-        <div className='w-full bg-white p-3 rounded-md'>
-            <h1 className='font-bold text-lg'>Filter Jobs</h1>
-            <hr className='mt-3' />
+        <div className='glass-card p-5 sticky top-20'>
+            <h1 className='font-semibold text-base text-foreground mb-1'>Filter Jobs</h1>
+            <div className='w-8 h-0.5 bg-neon-purple rounded-full mb-4'></div>
             <RadioGroup value={selectedValue} onValueChange={changeHandler}>
                 {
                     fitlerData.map((data, index) => (
-                        <div>
-                            <h1 className='font-bold text-lg'>{data.fitlerType}</h1>
+                        <div key={index} className='mb-5'>
+                            <h2 className='font-medium text-sm text-muted-foreground mb-2'>{data.fitlerType}</h2>
                             {
                                 data.array.map((item, idx) => {
                                     const itemId = `id${index}-${idx}`
                                     return (
-                                        <div className='flex items-center space-x-2 my-2'>
-                                            <RadioGroupItem value={item} id={itemId} />
-                                            <Label htmlFor={itemId}>{item}</Label>
+                                        <div key={itemId} className='flex items-center space-x-2 my-1.5'>
+                                            <RadioGroupItem value={item} id={itemId} className="border-border text-neon-purple" />
+                                            <Label htmlFor={itemId} className="text-xs text-muted-foreground cursor-pointer">{item}</Label>
                                         </div>
                                     )
                                 })

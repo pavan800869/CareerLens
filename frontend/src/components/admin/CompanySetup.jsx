@@ -1,5 +1,4 @@
 import React, { useEffect, useState } from 'react'
-import Navbar from '../shared/Navbar'
 import { Button } from '../ui/button'
 import { ArrowLeft, Loader2 } from 'lucide-react'
 import { Label } from '../ui/label'
@@ -75,69 +74,74 @@ const CompanySetup = () => {
     },[singleCompany]);
 
     return (
-        <div>
-
-            <div className='max-w-xl mx-auto my-10'>
-                <form onSubmit={submitHandler}>
-                    <div className='flex items-center gap-5 p-8'>
-                        <Button onClick={() => navigate("/admin/companies")} variant="outline" className="flex items-center gap-2 text-gray-500 font-semibold">
-                            <ArrowLeft />
-                            <span>Back</span>
-                        </Button>
-                        <h1 className='font-bold text-xl'>Company Setup</h1>
-                    </div>
+        <div className='max-w-xl mx-auto my-10 px-4 fade-in'>
+            <form onSubmit={submitHandler}>
+                <div className='flex items-center gap-5 mb-8'>
+                    <Button onClick={() => navigate("/admin/companies")} variant="outline" className="flex items-center gap-2 border-border text-muted-foreground hover:text-foreground hover:bg-accent rounded-lg">
+                        <ArrowLeft className='w-4 h-4' />
+                        <span>Back</span>
+                    </Button>
+                    <h1 className='font-bold text-xl text-foreground'>Company Setup</h1>
+                </div>
+                <div className='glass-card p-6'>
                     <div className='grid grid-cols-2 gap-4'>
                         <div>
-                            <Label>Company Name</Label>
+                            <Label className="text-muted-foreground text-sm">Company Name</Label>
                             <Input
                                 type="text"
                                 name="name"
                                 value={input.name}
                                 onChange={changeEventHandler}
+                                className="mt-1.5 bg-accent border-border text-foreground input-glow rounded-lg"
                             />
                         </div>
                         <div>
-                            <Label>Description</Label>
+                            <Label className="text-muted-foreground text-sm">Description</Label>
                             <Input
                                 type="text"
                                 name="description"
                                 value={input.description}
                                 onChange={changeEventHandler}
+                                className="mt-1.5 bg-accent border-border text-foreground input-glow rounded-lg"
                             />
                         </div>
                         <div>
-                            <Label>Website</Label>
+                            <Label className="text-muted-foreground text-sm">Website</Label>
                             <Input
                                 type="text"
                                 name="website"
                                 value={input.website}
                                 onChange={changeEventHandler}
+                                className="mt-1.5 bg-accent border-border text-foreground input-glow rounded-lg"
                             />
                         </div>
                         <div>
-                            <Label>Location</Label>
+                            <Label className="text-muted-foreground text-sm">Location</Label>
                             <Input
                                 type="text"
                                 name="location"
                                 value={input.location}
                                 onChange={changeEventHandler}
+                                className="mt-1.5 bg-accent border-border text-foreground input-glow rounded-lg"
                             />
                         </div>
-                        <div>
-                            <Label>Logo</Label>
+                        <div className='col-span-2'>
+                            <Label className="text-muted-foreground text-sm">Logo</Label>
                             <Input
                                 type="file"
                                 accept="image/*"
                                 onChange={changeFileHandler}
+                                className="mt-1.5 bg-accent border-border text-foreground rounded-lg"
                             />
                         </div>
                     </div>
-                    {
-                        loading ? <Button className="w-full my-4"> <Loader2 className='mr-2 h-4 w-4 animate-spin' /> Please wait </Button> : <Button type="submit" className="w-full my-4">Update</Button>
-                    }
-                </form>
-            </div>
-
+                    <div className='mt-6'>
+                        {
+                            loading ? <Button className="w-full gradient-btn text-white border-0 rounded-lg py-5" disabled> <Loader2 className='mr-2 h-4 w-4 animate-spin' /> Please wait </Button> : <Button type="submit" className="w-full gradient-btn text-white border-0 rounded-lg py-5">Update</Button>
+                        }
+                    </div>
+                </div>
+            </form>
         </div>
     )
 }

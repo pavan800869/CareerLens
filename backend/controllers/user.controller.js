@@ -130,9 +130,8 @@ export const updateProfile = async (req, res) => {
         let cloudResponse = null;
         if (fileUri?.content) {
             cloudResponse = await cloudinary.uploader.upload(fileUri.content, {
-                resource_type: "auto",
-                format: "pdf",
-                allowed_formats: ["pdf"],
+                resource_type: "raw",
+                allowed_formats: ["pdf", "docx"],
                 access_mode: "public",
                 folder: "careerlens/users/resumes"
             });

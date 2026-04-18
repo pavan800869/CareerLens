@@ -8,8 +8,7 @@ import { setSingleJob } from '@/redux/jobSlice';
 import { useDispatch, useSelector } from 'react-redux';
 import { toast } from 'sonner';
 import { response } from "./response";
-import Navbar from './shared/Navbar';
-import Footer from './shared/Footer';
+import { MapPin, Briefcase, DollarSign, Users, Clock, Sparkles } from 'lucide-react';
 
 const JobDescription = () => {
     const navigate = useNavigate();
@@ -25,13 +24,11 @@ const JobDescription = () => {
     const applyJobHandler = async () => {
         try {
             const res = await axios.get(`${APPLICATION_API_END_POINT}/apply/${jobId}`, {withCredentials:true});
-            
             if(res.data.success){
-                setIsApplied(true); // Update the local state
+                setIsApplied(true);
                 const updatedSingleJob = {...singleJob, applications:[...singleJob.applications,{applicant:user?._id}]}
-                dispatch(setSingleJob(updatedSingleJob)); // helps us to real time UI update
+                dispatch(setSingleJob(updatedSingleJob));
                 toast.success(res.data.message);
-
             }
         } catch (error) {
             console.log(error);
@@ -45,7 +42,7 @@ const JobDescription = () => {
                 const res = await axios.get(`${JOB_API_END_POINT}/get/${jobId}`,{withCredentials:true});
                 if(res.data.success){
                     dispatch(setSingleJob(res.data.job));
-                    setIsApplied(res.data.job.applications.some(application=>application.applicant === user?._id)) // Ensure the state is in sync with fetched data
+                    setIsApplied(res.data.job.applications.some(application=>application.applicant === user?._id))
                 }
             } catch (error) {
                 console.log(error);
@@ -57,77 +54,76 @@ const JobDescription = () => {
     useEffect(() => {
       setSingleJob(response);
     }, [])
-    
 
     return (
-        <div>
+        <div className='fade-in'>
+            <div className='max-w-7xl mx-auto my-10 px-4'>
+                {/* Header */}
+                <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-6 glass-card p-6 mb-8">
+                    <div>
+                        <h1 className="font-bold text-2xl text-foreground">{singleJob?.title}</h1>
+                        <p className="text-slate-500 text-sm mt-1">Posted on: {singleJob?.createdAt?.split("T")[0]}</p>
+                        <div className="flex items-center gap-3 mt-4 flex-wrap">
+                            <span className="badge-cyan text-xs px-3 py-1.5 rounded-full font-medium flex items-center gap-1">
+                                <Users className='w-3 h-3' /> {singleJob?.postion} Positions
+                            </span>
+                            <span className="badge-orange text-xs px-3 py-1.5 rounded-full font-medium flex items-center gap-1">
+                                <Briefcase className='w-3 h-3' /> {singleJob?.jobType}
+                            </span>
+                            <span className="badge-purple text-xs px-3 py-1.5 rounded-full font-medium flex items-center gap-1">
+                                <DollarSign className='w-3 h-3' /> {singleJob?.salary} LPA
+                            </span>
+                        </div>
+                    </div>
+                    <Button
+                        onClick={isApplied ? null : applyJobHandler}
+                        disabled={isApplied}
+                        className={`rounded-lg px-8 py-5 text-sm font-medium ${
+                            isApplied 
+                                ? 'bg-slate-700 text-muted-foreground cursor-not-allowed border-0' 
+                                : 'gradient-btn text-white border-0'
+                        }`}
+                    >
+                        {isApplied ? 'Already Applied' : 'Apply Now'}
+                    </Button>
+                </div>
 
-        <div className='max-w-7xl mx-auto my-10'>
-            <div className="flex items-center justify-between">
-                <div>
-                    <h1 className="font-bold text-2xl">{singleJob?.title}</h1>
-                    <p className="text-gray-500 text-sm mt-1">Posted on: {singleJob?.createdAt.split("T")[0]}</p>
-                    <div className="flex items-center gap-4 mt-4">
-                        <Badge className="text-blue-700 font-bold border-2 border-blue-700 " variant="ghost">
-                            <span className="material-icons">group</span> {singleJob?.postion} Positions
-                        </Badge>
-                        <Badge className="text-[#F83002] font-bold border-2 border-red-500 " variant="ghost">
-                            <span className="material-icons">work</span> {singleJob?.jobType}
-                        </Badge>
-                        <Badge className="text-[#7209b7] font-bold border-2 border-violet-700" variant="ghost">
-                            <span className="material-icons">attach_money</span> {singleJob?.salary} LPA
-                        </Badge>
+                {/* Info grid */}
+                <h2 className='text-foreground font-semibold text-lg mb-4 flex items-center gap-2'>
+                    <span className='w-1 h-5 bg-neon-purple rounded-full'></span>
+                    Job Description
+                </h2>
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-8">
+                    {[
+                        { icon: <Briefcase className='w-4 h-4 text-neon-purple' />, label: 'Role', value: singleJob?.title },
+                        { icon: <MapPin className='w-4 h-4 text-neon-cyan' />, label: 'Location', value: singleJob?.location },
+                        { icon: <Clock className='w-4 h-4 text-neon-orange' />, label: 'Experience', value: `${singleJob?.experienceLevel != null ? singleJob?.experienceLevel : 'N.A.'} yrs` },
+                        { icon: <DollarSign className='w-4 h-4 text-emerald-400' />, label: 'Salary', value: `${singleJob?.salary} LPA` },
+                        { icon: <Users className='w-4 h-4 text-amber-400' />, label: 'Total Applicants', value: singleJob?.applications?.length },
+                    ].map((item, i) => (
+                        <div key={i} className="glass-card p-4 flex items-start gap-3">
+                            <div className="w-8 h-8 rounded-lg bg-accent flex items-center justify-center mt-0.5">{item.icon}</div>
+                            <div>
+                                <h3 className="text-xs text-slate-500 font-medium">{item.label}</h3>
+                                <p className="text-sm text-foreground mt-0.5">{item.value}</p>
+                            </div>
+                        </div>
+                    ))}
+                    <div className="glass-card p-4 sm:col-span-2">
+                        <h3 className="text-xs text-slate-500 font-medium mb-1">Description</h3>
+                        <p className="text-sm text-muted-foreground leading-relaxed">{singleJob?.description}</p>
                     </div>
                 </div>
-                <Button
-                    onClick={isApplied ? null : applyJobHandler}
-                    disabled={isApplied}
-                    className={`rounded-lg px-6 py-2 ${isApplied ? 'bg-gray-600 cursor-not-allowed' : 'bg-[#7209b7] hover:bg-[#5f32ad]'}`}
-                >
-                    {isApplied ? 'Already Applied' : 'Apply Now'}
-                </Button>
-            </div>
 
-            <h1 className='border-b-2 border-b-gray-300 font-medium py-4'>Job Description</h1>
-            <div className="my-6 grid grid-cols-1 sm:grid-cols-2 gap-6">
-                <div className="w-full mx-auto bg-white border border-gray-200 rounded-2xl p-4">
-                    <h1 className="font-bold">Role</h1>
-                    <p className="text-gray-700 font-normal">{singleJob?.title}</p>
-                </div>
-                <div className="w-full mx-auto bg-white border border-gray-200 rounded-2xl p-4">
-                    <h1 className="font-bold">Location</h1>
-                    <p className="text-gray-700 font-normal">{singleJob?.location}</p>
-                </div>
-                <div className="w-full mx-auto bg-white border border-gray-200 rounded-2xl p-4">
-                    <h1 className="font-bold">Description</h1>
-                    <p className="text-gray-700 font-normal">{singleJob?.description}</p>
-                </div>
-                <div className="w-full mx-auto bg-white border border-gray-200 rounded-2xl p-4">
-                    <h1 className="font-bold">Experience</h1>
-                    <p className="text-gray-700 font-normal">{singleJob?.experience || "N.A."} yrs</p>
-                </div>
-                <div className="w-full mx-auto bg-white border border-gray-200 rounded-2xl p-4">
-                    <h1 className="font-bold">Salary</h1>
-                    <p className="text-gray-700 font-normal">{singleJob?.salary} LPA</p>
-                </div>
-                <div className="w-full mx-auto bg-white border border-gray-200 rounded-2xl p-4">
-                    <h1 className="font-bold">Total Applicants</h1>
-                    <p className="text-gray-700 font-normal">{singleJob?.applications?.length}</p>
-                </div>
-            </div>
-
-            <div className="mt-6">
+                {/* Explore Pathway CTA */}
                 <button
                     type="button"
                     onClick={() => navigate(`/pathway/${singleJob?._id}`)}
-                    className="bg-[#7209b7] text-white px-6 py-2 rounded-lg shadow hover:bg-[#5f32ad] transition-all font-semibold"
+                    className="gradient-btn text-white px-8 py-3 rounded-lg font-medium text-sm flex items-center gap-2"
                 >
-                    Explore Pathway
+                    <Sparkles className='w-4 h-4' /> Explore Career Pathway
                 </button>
             </div>
-
-        </div>
-
         </div>
     )
 }

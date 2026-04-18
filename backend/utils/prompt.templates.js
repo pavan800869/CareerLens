@@ -24,17 +24,18 @@ You are an AI designed to evaluate job applicants for a given role. Your task is
 - Include a **sentiment** assessment based on the resume’s tone. This should be one of the following values: **positive**, **neutral**, or **negative**. If the sentiment is unclear, consider it **neutral**.
 
 Please provide your response as a **JSON object** in this format:
-    "relevanceScore":   // Score the relevance between the job requirements and the applicant's resume (0 = no match, 100 = perfect match)
-    "skillMatch": "",  // List of skills that match between the job requirements and applicant's skills
-    "missingSkills": "",  // List of job requirements that the applicant is missing
-    "professionalBrand": // Assessment of the applicant's professional branding and online reputation
+{{
+    "relevanceScore": 0,  // Score the relevance between the job requirements and the applicant's resume (0 = no match, 100 = perfect match)
+    "skillMatch": [],  // List of skills that match between the job requirements and applicant's skills
+    "missingSkills": [],  // List of job requirements that the applicant is missing
+    "professionalBrand": {{
         "strengths": "",  // Key professional attributes
         "onlineEngagement": "",  // Summary of professional online activities
         "developmentAreas": ""  // Potential areas for growth
-    ,
+    }},
     "summary": "",  // A brief explanation of why the applicant is a good or bad fit
-
     "sentiment": ""  // Sentiment analysis based on resume content (consider tone, confidence, and wording)
+}}
 
 
 **Important Notes**:
@@ -56,38 +57,43 @@ Job Title: {title}
 Job Description: {description}
 Requirements: {requirements}
 
-Create a detailed career pathway for this role, the output should consist of the following key sections in a HTML format:
+Create a detailed career pathway for this role in STRICT JSON format. Return ONLY valid JSON without any markdown, code blocks, or extra text.
 
+The JSON structure must be exactly:
 
-  "0-3 Months": 
-    "Skills": [list of skills to develop in this time frame],
-    "Tasks": [list of actionable steps or projects to work on],
-    "Tips": [tips for excelling in this stage]
-  ,
-  "3-6 Months": 
-    "Skills": [list of skills to develop in this time frame],
+{{
+  "0-3 Months": {{
+    "Skills": ["skill1", "skill2", "skill3"],
+    "Tasks": ["task1", "task2", "task3"],
+    "Tips": ["tip1", "tip2", "tip3"]
+  }},
+  "3-6 Months": {{
+    "Skills": ["skill1", "skill2", "skill3"],
+    "Tasks": ["task1", "task2", "task3"],
+    "Tips": ["tip1", "tip2", "tip3"]
+  }},
+  "6-12 Months": {{
+    "Skills": ["skill1", "skill2", "skill3"],
+    "Tasks": ["task1", "task2", "task3"],
+    "Tips": ["tip1", "tip2", "tip3"]
+  }},
+  "1-2 Years": {{
+    "Skills": ["skill1", "skill2", "skill3"],
+    "Tasks": ["task1", "task2", "task3"],
+    "Tips": ["tip1", "tip2", "tip3"]
+  }},
+  "2+ Years": {{
+    "Skills": ["skill1", "skill2", "skill3"],
+    "Tasks": ["task1", "task2", "task3"],
+    "Tips": ["tip1", "tip2", "tip3"]
+  }}
+}}
 
-    "Tasks": [list of actionable steps or projects to work on],
-    "Tips": [tips for excelling in this stage]
-  ,
-  "6-12 Months": 
-    "Skills": [list of skills to develop in this time frame],
-    "Tasks": [list of actionable steps or projects to work on],
-    "Tips": [tips for excelling in this stage]
-  ,
-  "1-2 Years": 
-    "Skills": [list of skills to develop in this time frame],
-    "Tasks": [list of actionable steps or projects to work on],
-    "Tips": [tips for excelling in this stage]
-  ,
-  "2+ Years": 
-    "Skills": [list of advanced skills to master],
-    "Tasks": [list of high-level projects or responsibilities],
-    "Tips": [strategies for long-term success and growth]
-  
-
-
-Ensure the roadmap is comprehensive, actionable, and tailored to the role. Highlight key certifications and resources like Coursera, Udemy, or industry-recognized platforms.
+Important:
+- Return ONLY the JSON object, no markdown, no code blocks, no explanations
+- Each timeframe should have 3-5 items in each array
+- Make the pathway comprehensive, actionable, and tailored to the role
+- Focus on skills relevant to this job position and requirements
 `;
 
 
@@ -126,27 +132,26 @@ Input for Evaluation:
 - Ensure the scoring reflects both quantitative skills and qualitative professional attributes
 
 ### Output Format:
-Provide your output in the following strict Markdown format:
+Provide your output in the following strict JSON format:
 
-
-  "score": score, 
+{{
+  "score": 0, 
   "explanation": "explanation",
-  "granular_breakdown": 
-
-      "skill_match": score,
-    "relevance_of_experience": score,
-    "resume_quality": score,
-    "missing_skills_impact": score,
-    "soft_skills_and_professional_qualities": score,
-    "social_profile_insights": score,
-    "professional_continuous_learning": score
-  ,
-  "social_profile_insights_details": 
+  "granular_breakdown": {{
+    "skill_match": 0,
+    "relevance_of_experience": 0,
+    "resume_quality": 0,
+    "missing_skills_impact": 0,
+    "soft_skills_and_professional_qualities": 0,
+    "social_profile_insights": 0,
+    "professional_continuous_learning": 0
+  }},
+  "social_profile_insights_details": {{
     "github": "details",
     "linkedin": "details",
     "portfolio": "details"
-  
-
+  }}
+}}
 
 Where:
 - **score**: A numerical score between 0 and 100 representing the overall ranking of the applicant.

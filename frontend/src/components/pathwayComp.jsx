@@ -11,7 +11,7 @@ const UnitHeader = ({
     const language = "en"
     return (
       <article
-        className={["max-w-2xl text-white sm:rounded-xl", backgroundColor].join(
+        className={["max-w-2xl text-foreground sm:rounded-xl", backgroundColor].join(
           " ",
         )}
       >
@@ -100,37 +100,37 @@ const UnitHeader = ({
           
     return (
         <div
-            className={`absolute z-10 rounded-lg border-2 border-gray-200 bg-white px-5 py-4 shadow-lg ${className}`}
+            className={`absolute z-10 rounded-xl border border-border bg-card/95 backdrop-blur-xl px-5 py-4 shadow-2xl ${className}`}
             style={{
                 top: index==0? "200%" :  "50%",
-                width: `${fixedWidth}px`, // Set fixed width
-                left: isEven ? `-${fixedWidth + 40}px` : `calc(100% + 40px)`, // Adjust for left or right
-                transform: "translateY(-50%)", // Center vertically
+                width: `${fixedWidth}px`,
+                left: isEven ? `-${fixedWidth + 40}px` : `calc(100% + 40px)`,
+                transform: "translateY(-50%)",
             }}
         >
-            <h3 className="text-lg font-bold mb-2">Skills</h3>
+            <h3 className="text-sm font-semibold text-neon-purple mb-2">Skills</h3>
             <ul className="list-disc ml-5 mb-4">
                 {details?.Skills?.map((skill, index) => (
-                    <li key={index} className="text-sm">
+                    <li key={index} className="text-xs text-muted-foreground">
                         {skill}
                     </li>
                 ))}
             </ul>
 
-            <h3 className="text-lg font-bold mb-2">Tasks</h3>
+            <h3 className="text-sm font-semibold text-neon-cyan mb-2">Tasks</h3>
             <ul className="list-disc ml-5">
                 {details?.Tasks?.map((task, index) => (
-                    <li key={index} className="text-sm">
+                    <li key={index} className="text-xs text-muted-foreground">
                         {task}
                     </li>
                 ))}
             </ul>
 
             <div
-                className="absolute h-3 w-3 rotate-45 border-b-2 border-r-2 border-gray-200 bg-white"
+                className="absolute h-3 w-3 rotate-45 border-b border-r border-border bg-card"
                 style={{
-                    [isEven ? 'right' : 'left']: "-8px", // Align arrow to the correct side
-                    top: "50%", // Center the arrow vertically
+                    [isEven ? 'right' : 'left']: "-8px",
+                    top: "50%",
                     transform: "translateY(-50%)",
                 }}
             ></div>

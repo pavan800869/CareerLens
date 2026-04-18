@@ -20,9 +20,16 @@ export default {
     },
     extend: {
       fontFamily: {
-        sans: ['Poppins', 'sans-serif'],
+        sans: ['Inter', 'sans-serif'],
       },
       colors: {
+        'neon-purple': '#7C3AED',
+        'neon-cyan': '#06B6D4',
+        'neon-indigo': '#4F46E5',
+        'neon-orange': '#F97316',
+        'surface': '#0D0F1A',
+        'surface-card': '#12151F',
+        'surface-elevated': '#1A1D2E',
         border: "hsl(var(--border))",
         input: "hsl(var(--input))",
         ring: "hsl(var(--ring))",

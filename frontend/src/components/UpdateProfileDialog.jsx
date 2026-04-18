@@ -3,7 +3,7 @@ import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle } from '
 import { Label } from './ui/label'
 import { Input } from './ui/input'
 import { Button } from './ui/button'
-import { Loader2 } from 'lucide-react'
+import { Loader2, Plus } from 'lucide-react'
 import { useDispatch, useSelector } from 'react-redux'
 import axios from 'axios'
 import { USER_API_END_POINT } from '@/utils/constant'
@@ -70,79 +70,76 @@ const UpdateProfileDialog = ({ open, setOpen }) => {
         console.log(input);
     }
 
-
-
     return (
         <div>
             <Dialog open={open}>
-                <DialogContent className="sm:max-w-[500px]" onInteractOutside={() => setOpen(false)}>
+                <DialogContent className="sm:max-w-[500px] glass border-border rounded-xl" onInteractOutside={() => setOpen(false)}>
                     <DialogHeader>
-                        <DialogTitle>Update Profile</DialogTitle>
+                        <DialogTitle className="text-foreground">Update Profile</DialogTitle>
                     </DialogHeader>
                     <form onSubmit={submitHandler}>
                         <div className='grid gap-4 py-4'>
                             <div className='grid grid-cols-4 items-center gap-4'>
-                                <Label htmlFor="name" className="text-right">Name</Label>
+                                <Label htmlFor="name" className="text-right text-muted-foreground text-sm">Name</Label>
                                 <Input
                                     id="name"
                                     name="name"
                                     type="text"
                                     value={input.fullname}
                                     onChange={changeEventHandler}
-                                    className="col-span-3"
+                                    className="col-span-3 bg-accent border-border text-foreground input-glow rounded-lg"
                                 />
                             </div>
                             <div className='grid grid-cols-4 items-center gap-4'>
-                                <Label htmlFor="email" className="text-right">Email</Label>
+                                <Label htmlFor="email" className="text-right text-muted-foreground text-sm">Email</Label>
                                 <Input
                                     id="email"
                                     name="email"
                                     type="email"
                                     value={input.email}
                                     onChange={changeEventHandler}
-                                    className="col-span-3"
+                                    className="col-span-3 bg-accent border-border text-foreground input-glow rounded-lg"
                                 />
                             </div>
                             <div className='grid grid-cols-4 items-center gap-4'>
-                                <Label htmlFor="number" className="text-right">Number</Label>
+                                <Label htmlFor="number" className="text-right text-muted-foreground text-sm">Number</Label>
                                 <Input
                                     id="number"
                                     name="number"
                                     value={input.phoneNumber}
                                     onChange={changeEventHandler}
-                                    className="col-span-3"
+                                    className="col-span-3 bg-accent border-border text-foreground input-glow rounded-lg"
                                 />
                             </div>
                             <div className='grid grid-cols-4 items-center gap-4'>
-                                <Label htmlFor="bio" className="text-right">Bio</Label>
+                                <Label htmlFor="bio" className="text-right text-muted-foreground text-sm">Bio</Label>
                                 <Input
                                     id="bio"
                                     name="bio"
                                     value={input.bio}
                                     onChange={changeEventHandler}
-                                    className="col-span-3"
+                                    className="col-span-3 bg-accent border-border text-foreground input-glow rounded-lg"
                                 />
                             </div>
                             <div className='grid grid-cols-4 items-center gap-4'>
-                                <Label htmlFor="skills" className="text-right">Skills</Label>
+                                <Label htmlFor="skills" className="text-right text-muted-foreground text-sm">Skills</Label>
                                 <Input
                                     id="skills"
                                     name="skills"
                                     value={input.skills}
                                     onChange={changeEventHandler}
-                                    className="col-span-3"
+                                    className="col-span-3 bg-accent border-border text-foreground input-glow rounded-lg"
                                 />
                             </div>
                             {/* socials */}
                             <div className='grid grid-cols-4 items-center gap-4'>
-                                
-                                <Label htmlFor="social" className="text-right">Social</Label>
+                                <Label htmlFor="social" className="text-right text-muted-foreground text-sm">Social</Label>
 
                                 {/* its an array of links so we need to map over it and create a new input for each one */}
 
                                 {input.socials.map((social, index) => (
                                     <React.Fragment key={index}>
-                                        <Label htmlFor="social" className="text-right">Social</Label>
+                                        <Label htmlFor="social" className="text-right text-muted-foreground text-sm">Social</Label>
                                         <Input
                                             id="social"
                                             name="social"
@@ -152,7 +149,7 @@ const UpdateProfileDialog = ({ open, setOpen }) => {
                                                 newSocials[index] = e.target.value;
                                                 setInput({ ...input, socials: newSocials });
                                             }}
-                                            className="col-span-3"
+                                            className="col-span-3 bg-accent border-border text-foreground input-glow rounded-lg"
                                         />
                                     </React.Fragment>
                                 ))}
@@ -160,27 +157,27 @@ const UpdateProfileDialog = ({ open, setOpen }) => {
                                 <Button
                                     type="button"
                                     onClick={() => setInput({ ...input, socials: [...input.socials, ""] })}
-                                    className="col-span-4"
+                                    className="col-span-4 bg-accent border border-border text-muted-foreground hover:text-foreground hover:bg-secondary rounded-lg"
                                     >
-                                        Add Social
+                                        <Plus className='w-4 h-4 mr-1.5' /> Add Social
                                     </Button>
                             </div>
                             
                             <div className='grid grid-cols-4 items-center gap-4'>
-                                <Label htmlFor="file" className="text-right">Resume</Label>
+                                <Label htmlFor="file" className="text-right text-muted-foreground text-sm">Resume</Label>
                                 <Input
                                     id="file"
                                     name="file"
                                     type="file"
                                     accept="application/pdf"
                                     onChange={fileChangeHandler}
-                                    className="col-span-3"
+                                    className="col-span-3 bg-accent border-border text-foreground rounded-lg"
                                 />
                             </div>
                         </div>
                         <DialogFooter>
                             {
-                                loading ? <Button className="w-full my-4"> <Loader2 className='mr-2 h-4 w-4 animate-spin' /> Please wait </Button> : <Button type="submit" className="w-full my-4">Update</Button>
+                                loading ? <Button className="w-full my-4 gradient-btn text-white border-0 rounded-lg" disabled> <Loader2 className='mr-2 h-4 w-4 animate-spin' /> Please wait </Button> : <Button type="submit" className="w-full my-4 gradient-btn text-white border-0 rounded-lg">Update</Button>
                             }
                         </DialogFooter>
                     </form>

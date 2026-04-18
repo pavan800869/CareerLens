@@ -1,50 +1,30 @@
-import { useTheme } from "@mui/material";
 import { ResponsiveBar } from "@nivo/bar";
-import { tokens } from "./theme";
 import { mockBarData as data } from "./data/mockData";
 
-const BarChart = ({ isDashboard = false }) => {
-  const theme = useTheme();
-  const colors = tokens(theme.palette.mode);
-
+const BarChart = () => {
   return (
     <ResponsiveBar
       data={data}
       theme={{
         axis: {
-          domain: {
-            line: {
-              stroke: colors.grey[100],
-            },
-          },
-          legend: {
-            text: {
-              fill: colors.grey[100],
-            },
-          },
+          domain: { line: { stroke: "rgba(255,255,255,0.1)" } },
+          legend: { text: { fill: "#a1a1aa" } },
           ticks: {
-            line: {
-              stroke: colors.grey[100],
-              strokeWidth: 1,
-            },
-            text: {
-              fill: colors.grey[100],
-            },
+            line: { stroke: "rgba(255,255,255,0.1)", strokeWidth: 1 },
+            text: { fill: "#a1a1aa" },
           },
         },
-        legends: {
-          text: {
-            fill: colors.grey[100],
-          },
-        },
+        legends: { text: { fill: "#a1a1aa" } },
+        tooltip: { container: { color: "#12151F" } },
+        grid: { line: { stroke: "rgba(255,255,255,0.05)" } }
       }}
-      keys={["Applied", "Rejected", "Scheduled"]} // Use the stages instead of food items
-      indexBy="country" // Display software domains
-      margin={{ top: 50, right: 130, bottom: 50, left: 60 }}
+      keys={["Applied", "Scheduled", "Rejected"]}
+      indexBy="country"
+      margin={{ top: 10, right: 10, bottom: 40, left: 40 }}
       padding={0.3}
       valueScale={{ type: "linear" }}
       indexScale={{ type: "band", round: true }}
-      colors={{ scheme: "blues" }} // Custom bluish tone color scheme
+      colors={["#7C3AED", "#06B6D4", "#F97316"]}
       defs={[
         {
           id: "dots",
@@ -59,68 +39,36 @@ const BarChart = ({ isDashboard = false }) => {
           id: "lines",
           type: "patternLines",
           background: "inherit",
-          color: "#38a1db", // Updated bluish tone
+          color: "#eed312",
           rotation: -45,
           lineWidth: 6,
           spacing: 10,
         },
       ]}
-      borderColor={{
-        from: "color",
-        modifiers: [["darker", "1.6"]],
-      }}
+      borderColor={{ from: "color", modifiers: [["darker", "1.6"]] }}
       axisTop={null}
       axisRight={null}
       axisBottom={{
-        tickSize: 5,
-        tickPadding: 5,
+        tickSize: 0,
+        tickPadding: 10,
         tickRotation: 0,
-        legend: isDashboard ? undefined : "Domain", // Changed to "Domain"
         legendPosition: "middle",
         legendOffset: 32,
       }}
       axisLeft={{
-        tickSize: 5,
-        tickPadding: 5,
+        tickSize: 0,
+        tickPadding: 10,
         tickRotation: 0,
-        legend: isDashboard ? undefined : "Stages", // Changed to "Stages"
         legendPosition: "middle",
-        legendOffset: -40,
-        tickValues: [0, 30, 60, 90, 120, 150, 180, 210, 240, 270, 300], // Custom ticks
-      }}      
+        legendOffset: -35,
+      }}
       enableLabel={false}
       labelSkipWidth={12}
       labelSkipHeight={12}
-      labelTextColor={{
-        from: "color",
-        modifiers: [["darker", 1.6]],
-      }}
-      legends={[
-        {
-          dataFrom: "keys",
-          anchor: "bottom-right",
-          direction: "column",
-          justify: false,
-          translateX: 120,
-          translateY: 0,
-          itemsSpacing: 2,
-          itemWidth: 100,
-          itemHeight: 20,
-          itemDirection: "left-to-right",
-          itemOpacity: 0.85,
-          symbolSize: 20,
-          effects: [
-            {
-              on: "hover",
-              style: {
-                itemOpacity: 1,
-              },
-            },
-          ],
-        },
-      ]}
+      labelTextColor={{ from: "color", modifiers: [["darker", 1.6]] }}
       role="application"
-      barAriaLabel={(e) => `${e.id}: ${e.formattedValue} in domain: ${e.indexValue}`}
+      ariaLabel="Nivo bar chart demo"
+      barAriaLabel={(e) => `${e.id}: ${e.formattedValue} in country: ${e.indexValue}`}
     />
   );
 };

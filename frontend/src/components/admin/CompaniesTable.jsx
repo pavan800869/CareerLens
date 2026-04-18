@@ -21,40 +21,42 @@ const CompaniesTable = () => {
         setFilterCompany(filteredCompany);
     },[companies,searchCompanyByText])
     return (
-        <div>
+        <div className='overflow-x-auto'>
             <Table>
-                <TableCaption>A list of your recent registered companies</TableCaption>
+                <TableCaption className="text-slate-500 text-xs">A list of your registered companies</TableCaption>
                 <TableHeader>
-                    <TableRow>
-                        <TableHead>Logo</TableHead>
-                        <TableHead>Name</TableHead>
-                        <TableHead>Date</TableHead>
-                        <TableHead className="text-right">Action</TableHead>
+                    <TableRow className="border-border hover:bg-transparent">
+                        <TableHead className="text-muted-foreground text-xs font-medium">Logo</TableHead>
+                        <TableHead className="text-muted-foreground text-xs font-medium">Name</TableHead>
+                        <TableHead className="text-muted-foreground text-xs font-medium">Date</TableHead>
+                        <TableHead className="text-right text-muted-foreground text-xs font-medium">Action</TableHead>
                     </TableRow>
                 </TableHeader>
                 <TableBody>
                     {
                         filterCompany?.map((company) => (
-                            <tr>
+                            <TableRow key={company._id} className="border-border hover:bg-white/[0.02]">
                                 <TableCell>
-                                    <Avatar>
+                                    <Avatar className="w-8 h-8">
                                         <AvatarImage src={company.logo}/>
                                     </Avatar>
                                 </TableCell>
-                                <TableCell>{company.name}</TableCell>
-                                <TableCell>{company.createdAt.split("T")[0]}</TableCell>
+                                <TableCell className="text-foreground text-sm">{company.name}</TableCell>
+                                <TableCell className="text-muted-foreground text-xs">{company.createdAt.split("T")[0]}</TableCell>
                                 <TableCell className="text-right cursor-pointer">
                                     <Popover>
-                                        <PopoverTrigger><MoreHorizontal /></PopoverTrigger>
-                                        <PopoverContent className="w-32">
-                                            <div onClick={()=> navigate(`/admin/companies/${company._id}`)} className='flex items-center gap-2 w-fit cursor-pointer'>
-                                                <Edit2 className='w-4' />
-                                                <span>Edit</span>
+                                        <PopoverTrigger>
+                                            <MoreHorizontal className='text-muted-foreground hover:text-foreground transition-colors w-4 h-4' />
+                                        </PopoverTrigger>
+                                        <PopoverContent className="w-32 glass border-border rounded-lg p-2">
+                                            <div onClick={()=> navigate(`/admin/companies/${company._id}`)} className='flex items-center gap-2 w-full cursor-pointer text-muted-foreground hover:text-foreground px-2 py-1.5 rounded hover:bg-accent transition-colors'>
+                                                <Edit2 className='w-3.5 h-3.5' />
+                                                <span className='text-sm'>Edit</span>
                                             </div>
                                         </PopoverContent>
                                     </Popover>
                                 </TableCell>
-                            </tr>
+                            </TableRow>
 
                         ))
                     }

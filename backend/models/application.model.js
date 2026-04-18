@@ -15,6 +15,19 @@ const applicationSchema = new mongoose.Schema({
         type:String,
         enum:['pending', 'accepted', 'rejected'],
         default:'pending'
+    },
+    // Cache for AI-generated insights
+    aiInsights: {
+        type: String,
+        default: null
+    },
+    aiRankingScore: {
+        type: String,
+        default: null
+    },
+    aiInsightsGeneratedAt: {
+        type: Date,
+        default: null
     }
 },{timestamps:true});
 export const Application  = mongoose.model("Application", applicationSchema);

@@ -1,6 +1,5 @@
 import React, { useEffect, useState } from 'react'
 import { Table, TableBody, TableCaption, TableCell, TableHead, TableHeader, TableRow } from '../ui/table'
-import { Avatar, AvatarImage } from '../ui/avatar'
 import { Popover, PopoverContent, PopoverTrigger } from '../ui/popover'
 import { Edit2, Eye, MoreHorizontal } from 'lucide-react'
 import { useSelector } from 'react-redux'
@@ -24,40 +23,40 @@ const AdminJobsTable = () => {
         setFilterJobs(filteredJobs);
     },[allAdminJobs,searchJobByText])
     return (
-        <div>
+        <div className='overflow-x-auto'>
             <Table>
-                <TableCaption>A list of your recent  posted jobs</TableCaption>
+                <TableCaption className="text-slate-500 text-xs">A list of your recently posted jobs</TableCaption>
                 <TableHeader>
-                    <TableRow>
-                        <TableHead>Company Name</TableHead>
-                        <TableHead>Role</TableHead>
-                        <TableHead>Date</TableHead>
-                        <TableHead className="text-right">Action</TableHead>
+                    <TableRow className="border-border hover:bg-transparent">
+                        <TableHead className="text-muted-foreground text-xs font-medium">Company Name</TableHead>
+                        <TableHead className="text-muted-foreground text-xs font-medium">Role</TableHead>
+                        <TableHead className="text-muted-foreground text-xs font-medium">Date</TableHead>
+                        <TableHead className="text-right text-muted-foreground text-xs font-medium">Action</TableHead>
                     </TableRow>
                 </TableHeader>
                 <TableBody>
                     {
                         filterJobs?.map((job, index) => (
-                            <tr key={index}>
-                                <TableCell>{job?.company?.name}</TableCell>
-                                <TableCell>{job?.title}</TableCell>
-                                <TableCell>{job?.createdAt.split("T")[0]}</TableCell>
+                            <TableRow key={index} className="border-border hover:bg-white/[0.02]">
+                                <TableCell className="text-foreground text-sm">{job?.company?.name}</TableCell>
+                                <TableCell className="text-muted-foreground text-sm">{job?.title}</TableCell>
+                                <TableCell className="text-muted-foreground text-xs">{job?.createdAt.split("T")[0]}</TableCell>
                                 <TableCell className="text-right cursor-pointer">
                                     <Popover>
-                                        <PopoverTrigger><MoreHorizontal /></PopoverTrigger>
-                                        <PopoverContent className="w-48">
-                                            <div onClick={()=> navigate(`/admin/companies/${job._id}`)} className='flex items-center gap-2 w-fit cursor-pointer'>
-                                                <Edit2 className='w-4' />
-                                                <span>Edit</span>
+                                        <PopoverTrigger><MoreHorizontal className='text-muted-foreground hover:text-foreground transition-colors w-4 h-4' /></PopoverTrigger>
+                                        <PopoverContent className="w-40 glass border-border rounded-lg p-2">
+                                            <div onClick={()=> navigate(`/admin/companies/${job._id}`)} className='flex items-center gap-2 w-full cursor-pointer text-muted-foreground hover:text-foreground px-2 py-1.5 rounded hover:bg-accent transition-colors'>
+                                                <Edit2 className='w-3.5 h-3.5' />
+                                                <span className='text-sm'>Edit</span>
                                             </div>
-                                            <div onClick={()=> navigate(`/admin/jobs/${job._id}/applicants`)} className='flex items-center w-fit gap-2 cursor-pointer mt-2'>
-                                                <Eye className='w-4'/>
-                                                <span>Applicants</span>
+                                            <div onClick={()=> navigate(`/admin/jobs/${job._id}/applicants`)} className='flex items-center w-full gap-2 cursor-pointer text-muted-foreground hover:text-foreground px-2 py-1.5 rounded hover:bg-accent transition-colors mt-0.5'>
+                                                <Eye className='w-3.5 h-3.5'/>
+                                                <span className='text-sm'>Applicants</span>
                                             </div>
                                         </PopoverContent>
                                     </Popover>
                                 </TableCell>
-                            </tr>
+                            </TableRow>
 
                         ))
                     }

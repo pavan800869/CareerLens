@@ -21,52 +21,66 @@ const Job = ({ job }) => {
     };
 
     return (
-        <div className="p-5 rounded-md shadow-lg bg-white border border-gray-100 h-full flex flex-col justify-between">
+        <div className="glass-card p-5 h-full flex flex-col justify-between card-hover">
+            {/* Top row */}
             <div className="flex items-center justify-between">
-                <p className="text-sm text-gray-500">
+                <p className="text-xs text-slate-500">
                     {daysAgoFunction(job?.createdAt) === 0 ? "Today" : `${daysAgoFunction(job?.createdAt)} days ago`}
                 </p>
-                <Button variant="outline" className="rounded-full" size="icon">
-                    <Bookmark />
-                </Button>
+                <button className="w-8 h-8 rounded-full bg-accent border border-border flex items-center justify-center text-muted-foreground hover:text-neon-purple hover:border-neon-purple/30 transition-all">
+                    <Bookmark className='w-3.5 h-3.5' />
+                </button>
             </div>
 
-            <div className="flex items-center gap-2 my-2">
-                <Button className="p-6" variant="outline" size="icon">
-                    <Avatar>
+            {/* Company info */}
+            <div className="flex items-center gap-3 my-4">
+                <div className="w-10 h-10 rounded-lg bg-accent border border-border flex items-center justify-center overflow-hidden">
+                    <Avatar className="w-8 h-8">
                         <AvatarImage src={job?.company?.logo} />
                     </Avatar>
-                </Button>
+                </div>
                 <div>
-                    <h1 className="font-medium text-lg my-2">{job?.company?.name}</h1>
-                    <p className="text-sm text-gray-500">India</p>
+                    <h2 className="font-medium text-sm text-foreground">{job?.company?.name}</h2>
+                    <p className="text-xs text-slate-500">India</p>
                 </div>
             </div>
 
+            {/* Job details */}
             <div>
-                <h1 className="font-bold text-lg my-4">{job?.title}</h1>
-                <p className="text-sm text-gray-600 font-normal">
+                <h1 className="font-semibold text-base text-foreground mb-2">{job?.title}</h1>
+                <p className="text-xs text-muted-foreground leading-relaxed">
                     {truncateDescription(job?.description || '', 25)}
                 </p>
             </div>
 
-            <div className="flex items-center gap-2 mt-4">
-                <Badge className="text-blue-700 font-bold" variant="ghost">
+            {/* Badges */}
+            <div className="flex items-center gap-2 mt-4 flex-wrap">
+                <span className="badge-cyan text-xs px-2.5 py-1 rounded-full font-medium">
                     {job?.position} Positions
-                </Badge>
-                <Badge className="text-[#F83002] font-bold" variant="ghost">
+                </span>
+                <span className="badge-orange text-xs px-2.5 py-1 rounded-full font-medium">
                     {job?.jobType}
-                </Badge>
-                <Badge className="text-[#7209b7] font-bold" variant="ghost">
+                </span>
+                <span className="badge-purple text-xs px-2.5 py-1 rounded-full font-medium">
                     {job?.salary}LPA
-                </Badge>
+                </span>
+                <span className="text-neon-cyan bg-neon-cyan/10 text-xs px-2.5 py-1 rounded-full font-medium">
+                    {job?.experienceLevel} Yrs Exp
+                </span>
             </div>
 
-            <div className="flex items-center gap-4 mt-4">
-                <Button onClick={() => navigate(`/description/${job?._id}`)} variant="outline">
+            {/* Action buttons */}
+            <div className="flex items-center gap-3 mt-5">
+                <Button 
+                    onClick={() => navigate(`/description/${job?._id}`)} 
+                    variant="outline" 
+                    className="flex-1 text-xs border-border text-muted-foreground hover:text-foreground hover:bg-accent rounded-lg"
+                >
                     Details
                 </Button>
-                <Button className="bg-[#7209b7]">Save For Later</Button>
+                <Button className="flex-1 text-xs gradient-btn text-white rounded-lg border-0">
+                    Save For Later
+                </Button>
             </div>
         </div>
     );

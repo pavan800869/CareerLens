@@ -11,22 +11,62 @@ const shortlistingStatus = ['Accepted', 'Rejected'];
 
 function parseInsights(insights) {
   try {
-    if (!insights || typeof insights !== 'string') return null;
-    const cleanInsights = insights.replace(/^```json(?:n)?\n|\n```$/gi, '');
-    return JSON.parse(cleanInsights);
+    if (!insights || typeof insights !== 'string') {
+      console.warn('Insights is not a string:', typeof insights, insights);
+      return null;
+    }
+    
+    // Remove markdown code blocks more thoroughly
+    let cleanInsights = insights
+      .replace(/^```json\s*/gi, '')
+      .replace(/^```\s*/gi, '')
+      .replace(/\s*```\s*$/gi, '')
+      .trim();
+    
+    // Try to find JSON object in the string if it's embedded in other text
+    const jsonMatch = cleanInsights.match(/\{[\s\S]*\}/);
+    if (jsonMatch) {
+      cleanInsights = jsonMatch[0];
+    }
+    
+    const parsed = JSON.parse(cleanInsights);
+    console.log('Successfully parsed insights:', parsed);
+    return parsed;
   } catch (error) {
     console.error('Error parsing insights:', error);
+    console.error('Raw insights value:', insights);
+    console.error('Cleaned insights (first 500 chars):', insights?.substring(0, 500));
     return null;
   }
 }
 
 function parseRankingScore(rankingScore) {
   try {
-    if (!rankingScore || typeof rankingScore !== 'string') return null;
-    const cleanRankingScore = rankingScore.replace(/^```json(?:n)?\n|\n```$/gi, '');
-    return JSON.parse(cleanRankingScore);
+    if (!rankingScore || typeof rankingScore !== 'string') {
+      console.warn('Ranking score is not a string:', typeof rankingScore, rankingScore);
+      return null;
+    }
+    
+    // Remove markdown code blocks more thoroughly
+    let cleanRankingScore = rankingScore
+      .replace(/^```json\s*/gi, '')
+      .replace(/^```\s*/gi, '')
+      .replace(/\s*```\s*$/gi, '')
+      .trim();
+    
+    // Try to find JSON object in the string if it's embedded in other text
+    const jsonMatch = cleanRankingScore.match(/\{[\s\S]*\}/);
+    if (jsonMatch) {
+      cleanRankingScore = jsonMatch[0];
+    }
+    
+    const parsed = JSON.parse(cleanRankingScore);
+    console.log('Successfully parsed ranking score:', parsed);
+    return parsed;
   } catch (error) {
     console.error('Error parsing ranking score:', error);
+    console.error('Raw ranking score value:', rankingScore);
+    console.error('Cleaned ranking score (first 500 chars):', rankingScore?.substring(0, 500));
     return null;
   }
 }
@@ -43,15 +83,34 @@ const ApplicantsTable = () => {
 
     const fetchAIInsights = async () => {
       try {
+        console.log('Fetching AI insights for job:', jobId);
         const response = await axios.get(`${AI_API_END_POINT}/jobs/${jobId}/applicants`);
-        const processed = (response.data?.applicants || []).map(a => ({
-          ...a,
-          insights: parseInsights(a.insights) || {},
-          rankingScore: parseRankingScore(a.rankingScore) || {}
-        }));
+        console.log('Received AI response:', response.data);
+        console.log('Applicants in response:', response.data?.applicants?.length);
+        
+        const processed = (response.data?.applicants || []).map(a => {
+          console.log('Processing applicant:', a.applicant?.fullname);
+          console.log('Raw insights:', a.insights?.substring(0, 200));
+          console.log('Raw ranking score:', a.rankingScore?.substring(0, 200));
+          
+          const parsedInsights = parseInsights(a.insights);
+          const parsedRankingScore = parseRankingScore(a.rankingScore);
+          
+          console.log('Parsed insights result:', parsedInsights);
+          console.log('Parsed ranking score result:', parsedRankingScore);
+          
+          return {
+            ...a,
+            insights: parsedInsights || {},
+            rankingScore: parsedRankingScore || {}
+          };
+        });
+        
+        console.log('Processed applicants:', processed.length);
         setAiData({ applicants: processed, loading: false });
       } catch (error) {
         console.error('Error fetching AI insights:', error);
+        console.error('Error response:', error.response?.data);
         setAiData({ applicants: [], loading: false });
       }
     };
@@ -91,68 +150,78 @@ const ApplicantsTable = () => {
 
   if (aiData.loading) {
     return (
-      <div className="flex justify-center items-center min-h-screen text-xl">
-        <span>Loading applicant insights...</span>
+      <div className="flex justify-center items-center min-h-[300px]">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-10 w-10 border-b-2 border-neon-purple mx-auto mb-3"></div>
+          <span className='text-muted-foreground text-sm'>Loading applicant insights...</span>
+        </div>
       </div>
     );
   }
 
   return (
-    <div className="p-8 space-y-6">
-      <h1 className="text-3xl font-bold">Applicants ({allApplicants.length})</h1>
+    <div className="space-y-6">
+      <h1 className="text-2xl font-bold text-foreground">
+        Applicants <span className='badge-purple text-sm px-3 py-1 rounded-full ml-2'>{allApplicants.length}</span>
+      </h1>
 
+      {/* Profile Modal */}
       {showProfile && selectedApplicant && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-4">
-          <div className="bg-white rounded-lg p-6 max-w-2xl w-full max-h-[90vh] overflow-y-auto">
-            <div className="flex justify-between items-center mb-4">
-              <h2 className="text-2xl font-bold">Full Profile</h2>
-              <button onClick={() => setShowProfile(false)} className="text-gray-500 hover:text-gray-700">✕</button>
+        <div className="fixed inset-0 bg-background/60 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+          <div className="glass-card p-6 max-w-2xl w-full max-h-[90vh] overflow-y-auto">
+            <div className="flex justify-between items-center mb-6">
+              <h2 className="text-xl font-bold text-foreground">Full Profile</h2>
+              <button onClick={() => setShowProfile(false)} className="w-8 h-8 rounded-full bg-accent border border-border flex items-center justify-center text-muted-foreground hover:text-foreground transition-colors">✕</button>
             </div>
             <div className="space-y-4">
-              <div>
-                <h3 className="font-semibold">Name:</h3>
-                <p>{selectedApplicant.fullname}</p>
+              <div className='glass-card p-4'>
+                <h3 className="text-xs text-slate-500 font-medium">Name</h3>
+                <p className="text-foreground text-sm mt-0.5">{selectedApplicant.fullname}</p>
               </div>
-              <div>
-                <h3 className="font-semibold">Email:</h3>
-                <p>{selectedApplicant.email}</p>
+              <div className='glass-card p-4'>
+                <h3 className="text-xs text-slate-500 font-medium">Email</h3>
+                <p className="text-foreground text-sm mt-0.5">{selectedApplicant.email}</p>
               </div>
-              <div>
-                <h3 className="font-semibold">Contact:</h3>
-                <p>{selectedApplicant.application?.applicant?.phoneNumber || 'N/A'}</p>
+              <div className='glass-card p-4'>
+                <h3 className="text-xs text-slate-500 font-medium">Contact</h3>
+                <p className="text-foreground text-sm mt-0.5">{selectedApplicant.application?.applicant?.phoneNumber || 'N/A'}</p>
               </div>
-              <div>
-                <h3 className="font-semibold">Skills:</h3>
-                <div className="flex flex-wrap gap-2 mt-2">
+              <div className='glass-card p-4'>
+                <h3 className="text-xs text-slate-500 font-medium mb-2">Skills</h3>
+                <div className="flex flex-wrap gap-2">
                   {(selectedApplicant.application?.applicant?.profile?.skills || []).map((skill, i) => (
-                    <span key={i} className="bg-blue-100 text-blue-700 px-2 py-1 rounded text-sm">{skill}</span>
+                    <span key={i} className="badge-purple text-xs px-2.5 py-1 rounded-full">{skill}</span>
                   ))}
                 </div>
               </div>
-              <div>
-                <h3 className="font-semibold">Resume:</h3>
+              <div className='glass-card p-4'>
+                <h3 className="text-xs text-slate-500 font-medium">Resume</h3>
                 {selectedApplicant.application?.applicant?.profile?.resume ? (
-                  <a href={selectedApplicant.application.applicant.profile.resume} target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:underline">
+                  <a href={selectedApplicant.application.applicant.profile.resume} target="_blank" rel="noopener noreferrer" className="text-neon-purple text-sm hover:underline mt-0.5 inline-block">
                     {selectedApplicant.application.applicant.profile.resumeOriginalName || 'View Resume'}
                   </a>
                 ) : (
-                  <p className="text-gray-500">No resume uploaded</p>
+                  <p className="text-slate-500 text-sm mt-0.5">No resume uploaded</p>
                 )}
               </div>
-              <div>
-                <h3 className="font-semibold">Bio:</h3>
-                <p>{selectedApplicant.application?.applicant?.profile?.bio || 'N/A'}</p>
+              <div className='glass-card p-4'>
+                <h3 className="text-xs text-slate-500 font-medium">Bio</h3>
+                <p className="text-muted-foreground text-sm mt-0.5">{selectedApplicant.application?.applicant?.profile?.bio || 'N/A'}</p>
               </div>
-              <div>
-                <h3 className="font-semibold">Applied Date:</h3>
-                <p>{new Date(selectedApplicant.application?.createdAt || Date.now()).toLocaleDateString()}</p>
+              <div className='glass-card p-4'>
+                <h3 className="text-xs text-slate-500 font-medium">Applied Date</h3>
+                <p className="text-foreground text-sm mt-0.5">{new Date(selectedApplicant.application?.createdAt || Date.now()).toLocaleDateString()}</p>
               </div>
-              <div className="flex gap-2 pt-4">
+              <div className="flex gap-3 pt-2">
                 {shortlistingStatus.map((status) => (
                   <button
                     key={status}
                     onClick={() => statusHandler(status, selectedApplicant.application?._id)}
-                    className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700"
+                    className={`flex-1 px-4 py-2.5 rounded-lg text-sm font-medium transition-all ${
+                      status === 'Accepted' 
+                        ? 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 hover:bg-emerald-500/20' 
+                        : 'bg-red-500/10 text-red-400 border border-red-500/20 hover:bg-red-500/20'
+                    }`}
                   >
                     {status}
                   </button>
@@ -163,14 +232,17 @@ const ApplicantsTable = () => {
         </div>
       )}
 
-      <div className="grid grid-cols-1 gap-6">
-        {allApplicants.length === 0 && <p className="text-center text-gray-500">No applicants yet.</p>}
+      <div className="grid grid-cols-1 gap-5">
+        {allApplicants.length === 0 && <p className="text-center text-slate-500 py-10">No applicants yet.</p>}
         {allApplicants.map((item) => {
           const aiDataForThis = aiApplicantsMap.get(item.applicant?._id?.toString());
           if (!aiDataForThis) {
             return (
-              <div key={item.application._id} className="bg-white border rounded-lg p-4">
-                <p className="text-gray-500">Processing AI insights for {item.applicant?.fullname}...</p>
+              <div key={item.application._id} className="glass-card p-4">
+                <div className="flex items-center gap-3">
+                  <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-neon-purple"></div>
+                  <p className="text-muted-foreground text-sm">Processing AI insights for {item.applicant?.fullname}...</p>
+                </div>
               </div>
             );
           }

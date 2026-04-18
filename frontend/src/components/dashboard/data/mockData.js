@@ -394,7 +394,7 @@ export const mockPieData = [
 export const mockLineData = [
   {
     id: "App Dev",
-    color: tokens("dark").greenAccent[500], // Color choice for AI/ML
+    color: "#06B6D4", // Neon cyan
     data: [
       { x: "January", y: 120 },
       { x: "February", y: 150 },
@@ -412,7 +412,7 @@ export const mockLineData = [
   },
   {
     id: "Web Dev",
-    color: tokens("dark").blueAccent[300], // Color choice for Web Development
+    color: "#7C3AED", // Neon purple
     data: [
       { x: "January", y: 150 },
       { x: "February", y: 180 },
@@ -430,7 +430,7 @@ export const mockLineData = [
   },
   {
     id: "Ai/Ml",
-    color: tokens("dark").redAccent[200], // Color choice for App Development
+    color: "#F97316", // Neon orange
     data: [
       { x: "January", y: 80 },
       { x: "February", y: 90 },

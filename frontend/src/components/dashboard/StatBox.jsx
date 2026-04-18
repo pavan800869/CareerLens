@@ -1,43 +1,24 @@
-import { Box, Typography, useTheme } from "@mui/material";
-import { tokens } from "./theme";
-import ProgressCircle from "./ProgressCircle";
-
 const StatBox = ({ title, subtitle, icon, progress, increase }) => {
-  const theme = useTheme();
-  const colors = tokens(theme.palette.mode);
-
   return (
-    <Box width="100%" m="0 30px" borderRadius='12px'>
-      <Box display="flex" justifyContent="space-between">
-        <Box
-          color="black"
-        >
+    <div className="w-full p-4">
+      <div className="flex justify-between">
+        <div>
           {icon}
-          <Typography
-            variant="h5"
-            fontWeight="500"
-            sx={{ color: "black", fontFamily: "Poppins, sans-serif" }}
-          >
-            {title}
-          </Typography>
-        </Box>
-        <Box>
-          <ProgressCircle progress={progress} />
-        </Box>
-      </Box>
-      <Box display="flex" justifyContent="space-between" mt="2px">
-        <Typography fontWeight={'500'} sx={{ color: "black", fontFamily: "Poppins, sans-serif", fontSize: "16px" }}>
-          {subtitle}
-        </Typography>
-        <Typography
-          variant="h"
-          fontStyle="italic"
-          sx={{ color: "black", fontFamily: "Poppins, sans-serif" }}
-        >
-          {increase}
-        </Typography>
-      </Box>
-    </Box>
+          <h3 className="text-xl font-bold text-foreground mt-2">{title}</h3>
+        </div>
+        <div className="text-right">
+          <span className="badge-green text-[10px] px-2 py-0.5 rounded-full">{increase}</span>
+        </div>
+      </div>
+      <div className="flex justify-between items-center mt-2">
+        <p className="text-xs text-muted-foreground">{subtitle}</p>
+      </div>
+      {progress !== undefined && (
+        <div className="w-full h-1 bg-accent rounded-full mt-2 overflow-hidden">
+          <div className="h-full bg-gradient-to-r from-neon-purple to-neon-cyan rounded-full" style={{ width: `${progress * 100}%` }}></div>
+        </div>
+      )}
+    </div>
   );
 };
 

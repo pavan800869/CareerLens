@@ -2,6 +2,7 @@ import React, { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
 import axios from "axios";
 import { AI_API_END_POINT } from '@/utils/constant';
+import { Target, ClipboardList, Lightbulb, Award, ExternalLink } from 'lucide-react';
 
 const JobPathway = () => {
   const { id: jobId } = useParams();
@@ -17,21 +18,19 @@ const JobPathway = () => {
         const response = await axios.get(`${AI_API_END_POINT}/jobs/${jobId}/pathway`);
         const payload = response?.data?.pathway || {};
         
-        // Use parsed data if available, otherwise parse from text
         let parsedData = payload.pathParsed || null;
         if (!parsedData) {
           const responseData = payload.pathStr || payload.pathJson?.text || '';
+          
           try {
-            // Attempt to parse as JSON if it looks like JSON
             if (responseData.trim().startsWith('{') || responseData.includes('"')) {
               const cleaned = responseData.replace(/^```json\n?/i, '').replace(/```$/i, '').trim();
               parsedData = JSON.parse(cleaned);
             } else {
-              // Otherwise try to parse the markdown-style format
               parsedData = parsePathwayFromText(responseData);
             }
           } catch (e) {
-            // If JSON parsing fails, try text parsing
+            console.error('Parsing error:', e);
             parsedData = parsePathwayFromText(responseData);
           }
         }
@@ -40,6 +39,7 @@ const JobPathway = () => {
         setJobTitle(payload?.job?.title || '');
         setCertifications(payload?.certifications || []);
       } catch (err) {
+        console.error('Error fetching pathway:', err);
         setError(err.message || "Error fetching data.");
       } finally {
         setLoading(false);
@@ -49,7 +49,6 @@ const JobPathway = () => {
   }, [jobId]);
 
   const parsePathwayFromText = (text) => {
-    const timeframeRegex = /(\d+-\d+\s*(?:Months?|Years?)|2\+\s*Years?)/gi;
     const timeframes = ['0-3 Months', '3-6 Months', '6-12 Months', '1-2 Years', '2+ Years'];
     const result = {};
 
@@ -73,35 +72,60 @@ const JobPathway = () => {
     return Object.keys(result).length > 0 ? result : null;
   };
 
+  const stepColors = [
+    { bg: 'bg-neon-purple/10', border: 'border-neon-purple/30', text: 'text-neon-purple', ring: 'ring-neon-purple/20' },
+    { bg: 'bg-neon-cyan/10', border: 'border-neon-cyan/30', text: 'text-neon-cyan', ring: 'ring-neon-cyan/20' },
+    { bg: 'bg-neon-indigo/10', border: 'border-neon-indigo/30', text: 'text-neon-indigo', ring: 'ring-neon-indigo/20' },
+    { bg: 'bg-emerald-500/10', border: 'border-emerald-500/30', text: 'text-emerald-400', ring: 'ring-emerald-500/20' },
+    { bg: 'bg-neon-orange/10', border: 'border-neon-orange/30', text: 'text-neon-orange', ring: 'ring-neon-orange/20' },
+  ];
+
   if (loading) {
     return (
-      <div className="text-center text-gray-500 py-10">
-        <div className="animate-pulse">Loading career pathway...</div>
+      <div className="flex items-center justify-center min-h-[60vh]">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-neon-purple mx-auto mb-4"></div>
+          <p className="text-muted-foreground text-sm animate-pulse">Generating your career pathway...</p>
+        </div>
       </div>
     );
   }
 
   if (error) {
     return (
-      <div className="text-center text-red-500 py-10">
-        <p>Error: {error}</p>
+      <div className="flex items-center justify-center min-h-[60vh]">
+        <div className="glass-card p-8 max-w-md text-center">
+          <p className="text-red-400 text-sm">Error: {error}</p>
+        </div>
       </div>
     );
   }
 
-  const timeframes = pathwayData ? Object.keys(pathwayData) : [];
   const defaultTimeframes = ['0-3 Months', '3-6 Months', '6-12 Months', '1-2 Years', '2+ Years'];
+  const timeframes = pathwayData ? Object.keys(pathwayData) : [];
 
   return (
-    <div className="w-full min-h-screen bg-gray-50 p-6">
+    <div className="min-h-screen py-10 px-4 fade-in">
+      {/* Background effects */}
+      <div className="fixed inset-0 -z-10 overflow-hidden">
+        <div className="absolute top-1/4 left-1/4 w-96 h-96 bg-neon-purple/10 rounded-full blur-[150px]"></div>
+        <div className="absolute bottom-1/4 right-1/4 w-80 h-80 bg-neon-cyan/8 rounded-full blur-[120px]"></div>
+      </div>
+
+      {/* Header */}
       {jobTitle && (
-        <div className="text-center mb-8">
-          <h1 className="text-4xl font-bold text-gray-800">Career Pathway for {jobTitle}</h1>
+        <div className="text-center mb-12 max-w-3xl mx-auto">
+          <span className="badge-purple text-xs px-3 py-1 rounded-full mb-4 inline-block">AI-Generated Pathway</span>
+          <h1 className="text-3xl md:text-4xl font-bold text-foreground mt-3">
+            Career Pathway for <span className="gradient-text-purple">{jobTitle}</span>
+          </h1>
+          <p className="text-muted-foreground text-sm mt-3">Follow this roadmap to build the skills and experience needed for this role</p>
         </div>
       )}
 
+      {/* Timeline */}
       {pathwayData && timeframes.length > 0 ? (
-        <div className="max-w-4xl mx-auto space-y-8">
+        <div className="max-w-4xl mx-auto">
           {defaultTimeframes.map((timeframe, index) => {
             const data = pathwayData[timeframe];
             if (!data) return null;
@@ -109,108 +133,114 @@ const JobPathway = () => {
             const skills = Array.isArray(data.Skills) ? data.Skills : (data.skills || []);
             const tasks = Array.isArray(data.Tasks) ? data.Tasks : (data.tasks || []);
             const tips = Array.isArray(data.Tips) ? data.Tips : (data.tips || []);
+            const color = stepColors[index % stepColors.length];
 
-  return (
-              <div key={timeframe} className="relative">
-                {/* Timeline line */}
+            return (
+              <div key={timeframe} className="relative mb-6">
+                {/* Timeline connector */}
                 {index < defaultTimeframes.length - 1 && (
-                  <div className="absolute left-8 top-20 bottom-0 w-0.5 bg-blue-300"></div>
+                  <div className="absolute left-8 top-20 bottom-0 w-px bg-gradient-to-b from-white/10 to-transparent"></div>
                 )}
                 
-                <div className="bg-white rounded-lg shadow-lg p-6 border-l-4 border-blue-500 hover:shadow-xl transition-shadow">
+                <div className="glass-card p-6 card-hover">
                   {/* Timeframe Header */}
-                  <div className="flex items-center mb-4">
-                    <div className="w-16 h-16 rounded-full bg-blue-500 flex items-center justify-center text-white font-bold text-lg mr-4">
+                  <div className="flex items-center gap-4 mb-5">
+                    <div className={`w-14 h-14 rounded-xl ${color.bg} border ${color.border} flex items-center justify-center ${color.text} font-bold text-lg flex-shrink-0`}>
                       {index + 1}
                     </div>
-                    <h2 className="text-2xl font-bold text-gray-800">{timeframe}</h2>
+                    <div>
+                      <h2 className="text-xl font-bold text-foreground">{timeframe}</h2>
+                      <p className="text-xs text-slate-500">Phase {index + 1} of your journey</p>
+                    </div>
                   </div>
 
-                  {/* Skills Section */}
-                  {skills.length > 0 && (
-                    <div className="mb-4">
-                      <h3 className="text-lg font-semibold text-gray-700 mb-2 flex items-center">
-                        <span className="mr-2">🎯</span> Skills to Develop
-                      </h3>
-                      <ul className="list-disc list-inside space-y-1 ml-6">
-                        {skills.map((skill, i) => (
-                          <li key={i} className="text-gray-600">{skill}</li>
-                        ))}
-                      </ul>
-                    </div>
-                  )}
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                    {/* Skills */}
+                    {skills.length > 0 && (
+                      <div className="glass-card p-4">
+                        <h3 className="text-xs font-medium text-muted-foreground uppercase tracking-wider mb-3 flex items-center gap-1.5">
+                          <Target className="w-3.5 h-3.5 text-neon-purple" /> Skills to Develop
+                        </h3>
+                        <ul className="space-y-1.5">
+                          {skills.map((skill, i) => (
+                            <li key={i} className="text-xs text-muted-foreground flex items-start gap-2">
+                              <span className="w-1 h-1 rounded-full bg-neon-purple mt-1.5 flex-shrink-0"></span>
+                              {skill}
+                            </li>
+                          ))}
+                        </ul>
+                      </div>
+                    )}
 
-                  {/* Tasks Section */}
-                  {tasks.length > 0 && (
-                    <div className="mb-4">
-                      <h3 className="text-lg font-semibold text-gray-700 mb-2 flex items-center">
-                        <span className="mr-2">📋</span> Tasks & Projects
-                      </h3>
-                      <ul className="list-disc list-inside space-y-1 ml-6">
-                        {tasks.map((task, i) => (
-                          <li key={i} className="text-gray-600">{task}</li>
-                        ))}
-                      </ul>
-                    </div>
-                  )}
+                    {/* Tasks */}
+                    {tasks.length > 0 && (
+                      <div className="glass-card p-4">
+                        <h3 className="text-xs font-medium text-muted-foreground uppercase tracking-wider mb-3 flex items-center gap-1.5">
+                          <ClipboardList className="w-3.5 h-3.5 text-neon-cyan" /> Tasks & Projects
+                        </h3>
+                        <ul className="space-y-1.5">
+                          {tasks.map((task, i) => (
+                            <li key={i} className="text-xs text-muted-foreground flex items-start gap-2">
+                              <span className="w-1 h-1 rounded-full bg-neon-cyan mt-1.5 flex-shrink-0"></span>
+                              {task}
+                            </li>
+                          ))}
+                        </ul>
+                      </div>
+                    )}
 
-                  {/* Tips Section */}
-                  {tips.length > 0 && (
-                    <div>
-                      <h3 className="text-lg font-semibold text-gray-700 mb-2 flex items-center">
-                        <span className="mr-2">💡</span> Tips for Success
-                      </h3>
-                      <ul className="list-disc list-inside space-y-1 ml-6">
-                        {tips.map((tip, i) => (
-                          <li key={i} className="text-gray-600 italic">{tip}</li>
-                        ))}
-                      </ul>
-                    </div>
-                  )}
+                    {/* Tips */}
+                    {tips.length > 0 && (
+                      <div className="glass-card p-4">
+                        <h3 className="text-xs font-medium text-muted-foreground uppercase tracking-wider mb-3 flex items-center gap-1.5">
+                          <Lightbulb className="w-3.5 h-3.5 text-amber-400" /> Tips for Success
+                        </h3>
+                        <ul className="space-y-1.5">
+                          {tips.map((tip, i) => (
+                            <li key={i} className="text-xs text-muted-foreground italic flex items-start gap-2">
+                              <span className="w-1 h-1 rounded-full bg-amber-400 mt-1.5 flex-shrink-0"></span>
+                              {tip}
+                            </li>
+                          ))}
+                        </ul>
+                      </div>
+                    )}
+                  </div>
                 </div>
               </div>
             );
           })}
         </div>
       ) : (
-        <div className="bg-white rounded-lg p-6 shadow">
-          <p className="text-gray-500">Pathway data is being processed. Please check back later.</p>
+        <div className="glass-card p-8 max-w-md mx-auto text-center">
+          <p className="text-slate-500 text-sm">Pathway data is being processed. Please check back later.</p>
         </div>
       )}
 
+      {/* Certifications */}
       {certifications?.length > 0 && (
-        <div className="max-w-4xl mx-auto mt-12 bg-white border border-gray-200 rounded-2xl p-6 shadow-lg">
-          <h2 className="text-2xl font-bold text-gray-700 mb-4">📚 Recommended Certifications</h2>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <div className="max-w-4xl mx-auto mt-12 glass-card p-6">
+          <h2 className="text-lg font-bold text-foreground mb-4 flex items-center gap-2">
+            <Award className="w-5 h-5 text-neon-orange" />
+            Recommended Certifications
+          </h2>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
             {certifications.map((cert, index) => (
-              <div 
-                key={index} 
-                className="bg-gray-50 p-4 rounded-lg shadow-sm hover:shadow-md transition-all transform hover:-translate-y-1"
+              <a
+                key={index}
+                href={cert.link}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="glass-card p-4 card-hover flex items-center justify-between group"
               >
-                <a
-                  href={cert.link}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  aria-label={`Learn more about ${cert.title}`}
-                  className="text-blue-600 hover:underline font-semibold flex items-center"
-                >
-                  {cert.title}
-                  <svg 
-                    xmlns="http://www.w3.org/2000/svg" 
-                    className="h-5 w-5 ml-2 text-blue-500" 
-                    viewBox="0 0 20 20" 
-                    fill="currentColor"
-                  >
-                    <path d="M11 3a1 1 0 100 2h2.586l-6.293 6.293a1 1 0 101.414 1.414L15 6.414V9a1 1 0 102 0V4a1 1 0 00-1-1h-5z" />
-                    <path d="M5 5a2 2 0 00-2 2v8a2 2 0 002 2h8a2 2 0 002-2v-3a1 1 0 10-2 0v3H5V7h3a1 1 0 000-2H5z" />
-                  </svg>
-                </a>
-              </div>
+                <span className="text-sm font-medium text-foreground group-hover:text-neon-purple transition-colors">{cert.title}</span>
+                <ExternalLink className="w-4 h-4 text-slate-500 group-hover:text-neon-purple transition-colors" />
+              </a>
             ))}
           </div>
         </div>
       )}
-  </div>
+    </div>
   );
 };
 
