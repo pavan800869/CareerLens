@@ -3,7 +3,9 @@ import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
 import getDataUri from "../utils/datauri.js";
 import cloudinary from "../utils/cloudinary.js";
-
+import { Application } from "../models/application.model.js";
+import { Interview } from "../models/interview.model.js";
+import { Job } from "../models/job.model.js";
 export const register = async (req, res) => {
     try {
         const { fullname, email, phoneNumber, password, role } = req.body;
@@ -189,3 +191,79 @@ export const updateProfile = async (req, res) => {
         return res.status(500).json({ message: 'Internal Server Error', success: false });
     }
 }
+
+export const getDashboardStats = async (req, res) => {
+    try {
+        const userId = req.id;
+        const user = await User.findById(userId);
+        if (!user) {
+            return res.status(404).json({ message: "User not found", success: false });
+        }
+
+        let stats = {};
+        let recentActivity = [];
+
+        if (user.role === 'student') {
+            const applications = await Application.find({ applicant: userId }).populate({
+                path: 'job',
+                populate: {
+                    path: 'company'
+                }
+            }).sort({ createdAt: -1 });
+            const interviews = await Interview.find({ createdBy: userId });
+
+            const internshipsApplied = applications.length;
+            const skillsAdded = user.profile?.skills?.length || 0;
+            const interviewsScheduled = interviews.length;
+            const offersReceived = applications.filter(app => app.status === 'accepted').length;
+
+            recentActivity = applications.slice(0, 5).map(app => ({
+                txId: app.job?.title || "Unknown Job",
+                user: app.job?.company?.name || "Company",
+                date: app.createdAt.toISOString().split('T')[0],
+                status: app.status === 'accepted' ? 'Offer Received' : (app.status === 'pending' ? 'Pending' : 'Rejected')
+            }));
+
+            stats = {
+                internshipsApplied,
+                skillsAdded,
+                interviewsScheduled,
+                offersReceived
+            };
+
+        } else if (user.role === 'recruiter') {
+            const jobs = await Job.find({ created_by: userId });
+            const jobIds = jobs.map(job => job._id);
+            const applications = await Application.find({ job: { $in: jobIds } }).populate('job').populate('applicant').sort({ createdAt: -1 });
+
+            const internshipsApplied = applications.length; // Total applications received
+            const skillsAdded = jobs.length; // Total jobs posted
+            const interviewsScheduled = applications.filter(app => app.status === 'pending').length; // Pending review
+            const offersReceived = applications.filter(app => app.status === 'accepted').length; // Offers sent
+
+            recentActivity = applications.slice(0, 5).map(app => ({
+                txId: app.applicant?.fullname || 'Candidate',
+                user: app.job?.title || "Job",
+                date: app.createdAt.toISOString().split('T')[0],
+                status: app.status === 'accepted' ? 'Offer Received' : (app.status === 'pending' ? 'Pending' : 'Rejected')
+            }));
+
+            stats = {
+                internshipsApplied,
+                skillsAdded,
+                interviewsScheduled,
+                offersReceived
+            };
+        }
+
+        return res.status(200).json({
+            success: true,
+            stats,
+            recentActivity
+        });
+
+    } catch (error) {
+        console.log(error);
+        return res.status(500).json({ message: 'Internal Server Error', success: false });
+    }
+};

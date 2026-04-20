@@ -1,183 +1,138 @@
-# CareerLens Monorepo
+# CareerLens
 
-This repository contains three applications working together:
+CareerLens is a comprehensive, AI-powered career development platform and job portal. It connects candidates with recruiters while offering advanced AI features like personalized career pathways and interactive AI mock interviews.
 
-- `ai_mock_interview` – Next.js app for AI mock interviews using Gemini, Clerk auth, and Neon Postgres via Drizzle.
-- `backend` – Node/Express REST API for jobs, companies, applications, users, and AI helpers; MongoDB + Cloudinary.
-- `frontend` – Vite/React SPA for candidate/admin experiences consuming the backend APIs; Redux state management.
+## System Architecture
 
-## Repository structure
+CareerLens follows a modern client-server architecture with two main components:
+
+- **frontend**: A Vite-powered React Single Page Application (SPA) serving both Candidates and Recruiters. It handles job searching, application management, admin dashboards, and the interactive AI mock interview experience (webcam/microphone integration).
+- **backend**: A Node.js and Express REST API powered by MongoDB. It manages the business logic, user authentication, file uploads (via Cloudinary), and integrates with Google's Gemini AI (via Langchain) for mock interview question generation and career pathway insights.
+
+### Directory Structure
 
 ```text
-/Users/pavankumar/Documents/Programming/CareerLens
-├─ ai_mock_interview/                # Next.js app for AI mock interviews
-├─ backend/                          # Express API for job marketplace + AI helpers
-└─ frontend/                         # Vite/React SPA consuming backend APIs
+/CareerLens
+├─ backend/      # Express REST API, MongoDB models, AI integrations
+└─ frontend/     # React SPA, Redux state, UI components, Mock Interview logic
 ```
 
-## System context
+## Core Workflows
 
-```mermaid
-flowchart LR
-  subgraph Users
-    U1[Candidate User]
-    U2[Admin User]
-  end
-
-  subgraph NextApp[ai_mock_interview (Next.js)]
-    NUI[Pages + Client Components]
-    NDB[(Neon Postgres\nDrizzle ORM)]
-    NAuth[Clerk Auth]
-    NGem[Google Generative AI\n(Gemini)]
-  end
-
-  subgraph Backend[backend (Express API)]
-    BE[REST Controllers]
-    BDB[(MongoDB)]
-    BAI[AI Helper Logic]
-    BCloud[Cloudinary]
-  end
-
-  subgraph SPA[frontend (Vite/React)]
-    FUI[SPA Screens + Redux]
-  end
-
-  U1 --> NUI
-  U2 --> FUI
-
-  NUI <-->|CRUD interview data| NDB
-  NUI -->|Prompts| NGem
-  NUI -->|Auth| NAuth
-
-  FUI -->|REST calls| BE
-  BE -->|CRUD| BDB
-  BE -->|Upload| BCloud
-  FUI -->|AI pathway| BE
-  BE -->|Prompting/LLM usage (optional)| BAI
-```
-
-## Component/Deployment view
-
-```mermaid
-graph TD
-  subgraph Monorepo
-    A[ai_mock_interview\nNext.js App Router] --> A1[UI Components (Shadcn/Lucide)]
-    A --> A2[Feature: Mock Interview]
-    A2 --> A2a[Gemini Client]
-    A2 --> A2b[Drizzle Repo (MockInterview, UserAnswer)]
-    A --> A3[Clerk Integration]
-    A --> A4[Neon HTTP Driver]
-
-    B[backend\nExpress] --> B1[Routes (jobs, companies, applications, users, ai)]
-    B --> B2[Controllers]
-    B --> B3[Mongoose Models]
-    B --> B4[Cloudinary Utils]
-    B --> B5[Mongo Connection]
-
-    C[frontend\nVite/React SPA] --> C1[Screens (Home, Jobs, Admin)]
-    C --> C2[Redux Slices]
-    C --> C3[Hooks (fetchers)]
-    C -->|REST| B
-  end
-```
-
-## Workflows
-
-### Create mock interview (Next.js)
-
-```mermaid
-sequenceDiagram
-  actor User
-  participant UI as Next.js UI (AddNewInterview.jsx)
-  participant GEM as Gemini API
-  participant PG as Neon Postgres (Drizzle)
-
-  User->>UI: Fill role, description, experience
-  UI->>GEM: Prompt "Generate N Q&As JSON"
-  GEM-->>UI: JSON-like text response
-  UI->>UI: Normalize/parse JSON
-  UI->>PG: INSERT MockInterview (jsonMockResp,...)
-  PG-->>UI: mockId
-  UI->>User: Navigate to /dashboard/interview/:mockId
-```
-
-### Interview session (Next.js)
-
-```mermaid
-sequenceDiagram
-  actor User
-  participant Start as /start page
-  participant STT as Speech-to-Text (react-hook-speech-to-text)
-  participant PG as Neon Postgres (Drizzle)
-
-  User->>Start: Start interview
-  loop Each question
-    User->>STT: Speak answer (toggle mic)
-    STT-->>Start: Transcript chunks
-    Start->>Start: Aggregate transcript
-    alt Mic stopped and answer length ok
-      Start->>PG: INSERT UserAnswer for question
-      PG-->>Start: OK
-    end
-  end
-  Start->>User: Navigate to feedback (optional)
-```
-
-### AI Career Pathway (SPA + backend)
-
-```mermaid
-sequenceDiagram
-  actor User
-  participant SPA as Vite SPA (JobPathway.jsx)
-  participant API as Express API /api/v1/ai
-  participant BDB as MongoDB (if persisting)
-  participant LLM as AI logic (controller/templates)
-
-  User->>SPA: Open job pathway view
-  SPA->>API: GET /api/v1/ai/jobs/:jobId/pathway
-  API->>LLM: Build prompt + fetch/generate content
-  LLM-->>API: Pathway text/markdown/json
-  API->>BDB: (Optional) Persist pathway
-  API-->>SPA: pathway payload
-  SPA->>User: Render (Markdown)
-```
-
-### Job browsing and applying (SPA + backend)
+### 1. Job Browsing & Applying Workflow
 
 ```mermaid
 sequenceDiagram
   actor Candidate
-  participant SPA as Vite SPA
+  participant SPA as React Frontend
   participant API as Express API
-  participant BDB as MongoDB
+  participant DB as MongoDB
 
-  Candidate->>SPA: Browse jobs
+  Candidate->>SPA: Browse or Search Jobs
   SPA->>API: GET /api/v1/jobs
-  API->>BDB: Query list
-  BDB-->>API: Jobs
-  API-->>SPA: Jobs
-  SPA->>Candidate: Render results
+  API->>DB: Query job listings
+  DB-->>API: Job data
+  API-->>SPA: JSON list of jobs
+  SPA->>Candidate: Render jobs grid
 
-  Candidate->>SPA: Apply to job
-  SPA->>API: GET/POST /api/v1/applications/apply/:jobId (auth)
-  API->>BDB: Create application
-  BDB-->>API: OK
-  API-->>SPA: Success
-  SPA->>Candidate: Toast + update UI
+  Candidate->>SPA: Apply to specific Job
+  SPA->>API: POST /api/v1/applications/apply/:jobId
+  API->>DB: Create Application record
+  DB-->>API: Success
+  API-->>SPA: Success response
+  SPA->>Candidate: Show success toast notification
 ```
 
-## Data stores
+### 2. AI Mock Interview Workflow
 
-- ai_mock_interview: Neon Postgres via Drizzle HTTP driver.
-- backend: MongoDB with Mongoose.
+```mermaid
+sequenceDiagram
+  actor Candidate
+  participant SPA as React Frontend
+  participant API as Express API
+  participant AI as Gemini AI
+  participant DB as MongoDB
 
-## Auth
+  Candidate->>SPA: Fill role, description, and experience
+  SPA->>API: POST /api/v1/interview/generate
+  API->>AI: Prompt: "Generate X interview questions based on role..."
+  AI-->>API: JSON with Questions & Expected Answers
+  API->>DB: Save Mock Interview session
+  API-->>SPA: Interview session ID
 
-- ai_mock_interview: Clerk.
-- backend/frontend: Cookie/JWT (see `middlewares/isAuthenticated.js`).
+  Candidate->>SPA: Start Interview Session (Webcam/Mic)
+  loop Each Question
+    Candidate->>SPA: Record answer (Speech-to-Text)
+    SPA->>API: POST /api/v1/interview/answer
+    API->>AI: Prompt: "Evaluate user answer against expected answer..."
+    AI-->>API: Feedback and Rating
+    API->>DB: Save User Answer and Feedback
+    API-->>SPA: Feedback results
+  end
+  SPA->>Candidate: Show final interview feedback & score
+```
 
-## Environments
+### 3. Recruiter Job Management Workflow
 
-- ai_mock_interview: `NEXT_PUBLIC_GEMINI_API_KEY`, `NEXT_PUBLIC_DRIZZLE_DB_URL`, `NEXT_PUBLIC_INTERVIEW_QUESTION`, Clerk envs.
-- backend: MongoDB URI, Cloudinary keys, JWT secret, etc.
-- frontend: API base URLs in `src/utils/constant.js`.
+```mermaid
+sequenceDiagram
+  actor Recruiter
+  participant SPA as React Frontend
+  participant API as Express API
+  participant DB as MongoDB
+
+  Recruiter->>SPA: Create New Company
+  SPA->>API: POST /api/v1/company/register
+  API->>DB: Insert Company
+  API-->>SPA: Company ID
+  
+  Recruiter->>SPA: Post New Job
+  SPA->>API: POST /api/v1/jobs/post
+  API->>DB: Insert Job linked to Company
+  API-->>SPA: Success
+  
+  Recruiter->>SPA: View Applicants
+  SPA->>API: GET /api/v1/applications/:jobId
+  API->>DB: Query Applications + User Data
+  API-->>SPA: Applicants list
+  SPA->>Recruiter: Render Applicants Data Table
+```
+
+### 4. AI Career Pathway Workflow
+
+```mermaid
+sequenceDiagram
+  actor Candidate
+  participant SPA as React Frontend
+  participant API as Express API
+  participant AI as Gemini AI
+
+  Candidate->>SPA: Request Career Pathway
+  SPA->>API: GET /api/v1/ai/pathway/:jobId
+  API->>AI: Build prompt using Job details + User profile
+  AI-->>API: Markdown/JSON of learning pathway
+  API-->>SPA: Pathway payload
+  SPA->>Candidate: Render dynamic markdown pathway
+```
+
+## Features
+
+- **For Candidates:**
+  - Search and filter jobs by location, salary, and role.
+  - Apply to jobs with a single click (resume parsing support).
+  - Practice with AI-driven mock interviews, utilizing speech-to-text and webcam.
+  - Generate personalized career learning pathways using AI.
+- **For Recruiters (Admins):**
+  - Manage company profiles and post job listings.
+  - View applicant details, download resumes, and manage application statuses (Accepted/Rejected).
+  - View dashboard analytics (charts and stats for applications and jobs).
+
+## Getting Started
+
+To run the full stack locally, you need to set up both the backend and frontend.
+
+1. Clone the repository.
+2. Navigate to `/backend`, configure your `.env` file, and run `npm install` followed by `npm run dev`.
+3. Navigate to `/frontend`, configure your `.env` file (if necessary), and run `npm install` followed by `npm run dev`.
+
+Please see the respective `README.md` files in the `frontend` and `backend` directories for detailed setup instructions.
